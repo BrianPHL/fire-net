@@ -96,6 +96,7 @@ flutter run
 - **Aidan** ([AiD4HN](https://github.com/AiD4HN))
 - **Kyle**
 - **Alaine**
+- [rcpinca.it@tip.edu.ph](url) (Professor)
 
 ## Target Timeline
 April 15 - 19, 2026
