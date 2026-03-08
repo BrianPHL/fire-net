@@ -1,4 +1,7 @@
+import 'package:fire_net/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_colors.dart';
 import 'core/constants/app_constants.dart';
@@ -17,7 +20,14 @@ import 'features/engineer/screens/system_diagnostics_screen.dart';
 import 'models/alert.dart';
 import 'models/sensor_node.dart';
 
-void main() {
+Future <void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: '.env');
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const FireNetApp());
 }
 
