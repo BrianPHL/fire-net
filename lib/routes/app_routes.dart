@@ -17,6 +17,7 @@ class AppRoutes {
   static const String engineerDashboard = '/engineer/dashboard';
   static const String sensorManagement = '/engineer/sensor-management';
   static const String systemConfig = '/engineer/system-config';
+  static const String systemDiagnostics = '/engineer/system-diagnostics';
 
   // Initial route
   static const String initial = login;

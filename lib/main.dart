@@ -10,6 +10,7 @@ import 'features/user/screens/alerts_screen.dart';
 import 'features/user/screens/alert_history_screen.dart';
 import 'features/user/screens/alert_detail_screen.dart';
 import 'features/user/screens/sensor_detail_screen.dart';
+import 'features/engineer/screens/engineer_main_screen.dart';
 import 'models/alert.dart';
 import 'models/sensor_node.dart';
 
@@ -73,15 +74,26 @@ class FireNetApp extends StatelessWidget {
           ),
         );
 
-      // Engineer routes (placeholder - not yet implemented)
+      // Engineer routes
       case AppRoutes.engineerDashboard:
-        return _notImplementedRoute();
+        return MaterialPageRoute(
+          builder: (_) => const EngineerMainScreen(initialIndex: 0),
+        );
       
       case AppRoutes.sensorManagement:
-        return _notImplementedRoute();
+        return MaterialPageRoute(
+          builder: (_) => const EngineerMainScreen(initialIndex: 1),
+        );
       
       case AppRoutes.systemConfig:
-        return _notImplementedRoute();
+        return MaterialPageRoute(
+          builder: (_) => const EngineerMainScreen(initialIndex: 2),
+        );
+      
+      case AppRoutes.systemDiagnostics:
+        return MaterialPageRoute(
+          builder: (_) => const EngineerMainScreen(initialIndex: 3),
+        );
 
       default:
         return _errorRoute('Page not found');
@@ -108,44 +120,6 @@ class FireNetApp extends StatelessWidget {
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 18,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Route<dynamic> _notImplementedRoute() {
-    return MaterialPageRoute(
-      builder: (_) => Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(title: const Text('Coming Soon')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.construction,
-                size: 64,
-                color: AppColors.warning,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Engineer Feature',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'This feature is not yet implemented',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 16,
                 ),
               ),
             ],
