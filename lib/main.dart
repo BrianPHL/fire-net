@@ -10,7 +10,10 @@ import 'features/user/screens/alerts_screen.dart';
 import 'features/user/screens/alert_history_screen.dart';
 import 'features/user/screens/alert_detail_screen.dart';
 import 'features/user/screens/sensor_detail_screen.dart';
-import 'features/engineer/screens/engineer_main_screen.dart';
+import 'features/engineer/screens/dashboard_screen.dart';
+import 'features/engineer/screens/sensor_management_screen.dart';
+import 'features/engineer/screens/system_config_screen.dart';
+import 'features/engineer/screens/system_diagnostics_screen.dart';
 import 'models/alert.dart';
 import 'models/sensor_node.dart';
 
@@ -77,22 +80,22 @@ class FireNetApp extends StatelessWidget {
       // Engineer routes
       case AppRoutes.engineerDashboard:
         return MaterialPageRoute(
-          builder: (_) => const EngineerMainScreen(initialIndex: 0),
+          builder: (_) => const DashboardScreen(),
         );
       
       case AppRoutes.sensorManagement:
         return MaterialPageRoute(
-          builder: (_) => const EngineerMainScreen(initialIndex: 1),
+          builder: (_) => const SensorManagementScreen(),
         );
       
       case AppRoutes.systemConfig:
         return MaterialPageRoute(
-          builder: (_) => const EngineerMainScreen(initialIndex: 2),
+          builder: (_) => const SystemConfigScreen(),
         );
       
       case AppRoutes.systemDiagnostics:
         return MaterialPageRoute(
-          builder: (_) => const EngineerMainScreen(initialIndex: 3),
+          builder: (_) => const SystemDiagnosticsScreen(),
         );
 
       default:
