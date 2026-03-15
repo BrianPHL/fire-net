@@ -38,6 +38,7 @@ dependencies:
   # Date formatting
   intl: ^0.19.0
   firebase_core: ^4.5.0
+  firebase_auth: ^6.1.0
   
   # Environment variables (like dotenv in Node.js)
   flutter_dotenv: ^5.2.1
