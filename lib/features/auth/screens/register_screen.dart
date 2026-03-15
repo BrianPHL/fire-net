@@ -63,6 +63,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       Navigator.pushReplacementNamed(context, AppRoutes.userHome);
     } on FirebaseAuthException catch (error) {
+      debugPrint(
+        'Register failed: code=${error.code}, message=${error.message}',
+      );
+
       if (!mounted) {
         return;
       }

@@ -26,9 +26,14 @@ class AuthService {
       password: password,
     );
 
+    // Profile update should not block successful account creation.
     if (name.trim().isNotEmpty) {
-      await userCredential.user?.updateDisplayName(name.trim());
-      await userCredential.user?.reload();
+      try {
+        await userCredential.user?.updateDisplayName(name.trim());
+        await userCredential.user?.reload();
+      } catch (_) {
+        // Ignore profile update errors and keep the newly created account signed in.
+      }
     }
 
     return userCredential;
@@ -63,12 +68,19 @@ class AuthService {
         return 'Please enter a valid email address.';
       case 'operation-not-allowed':
         return 'Email/password sign up is not enabled.';
+      case 'unauthorized-domain':
+        return 'This web domain is not authorized in Firebase.';
+      case 'app-not-authorized':
+      case 'invalid-api-key':
+        return 'Firebase app configuration is invalid for this platform.';
+      case 'network-request-failed':
+        return 'Network error. Please check your connection and try again.';
       case 'weak-password':
         return 'Please use a stronger password.';
       case 'too-many-requests':
         return 'Too many attempts. Please try again later.';
       default:
-        return 'Registration failed. Please try again.';
+        return 'Registration failed (${exception.code}). Please try again.';
     }
   }
 }
