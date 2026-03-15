@@ -5,6 +5,7 @@ import '../../../models/sensor_node.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/layouts/app_scaffold.dart';
+import '../../auth/auth_service.dart';
 import '../widgets/sensor_card.dart';
 import '../widgets/hazard_indicator.dart';
 
@@ -18,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  final _authService = AuthService();
 
   // Mock data - in real app, this would come from state management
   final List<SensorNode> _sensors = SensorNode.getMockNodes();
@@ -25,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onNavigationChanged(int index) {
     setState(() => _currentIndex = index);
-    
+
     switch (index) {
       case 0:
         // Already on home
@@ -39,11 +41,39 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _handleLogout() async {
+    try {
+      await _authService.signOut();
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to logout right now. Please try again.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: _currentIndex,
       onNavigationChanged: _onNavigationChanged,
+      onLogout: _handleLogout,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

@@ -3,6 +3,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/layouts/app_scaffold.dart';
+import '../../auth/auth_service.dart';
 import '../widgets/alert_card.dart';
 
 /// Active alerts screen showing current unresolved alerts
@@ -15,6 +16,7 @@ class AlertsScreen extends StatefulWidget {
 
 class _AlertsScreenState extends State<AlertsScreen> {
   int _currentIndex = 1;
+  final _authService = AuthService();
 
   // Mock data
   final List<Alert> _alerts = Alert.getMockAlerts()
@@ -23,7 +25,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
 
   void _onNavigationChanged(int index) {
     setState(() => _currentIndex = index);
-    
+
     switch (index) {
       case 0:
         Navigator.pushReplacementNamed(context, AppRoutes.userHome);
@@ -37,18 +39,41 @@ class _AlertsScreenState extends State<AlertsScreen> {
     }
   }
 
+  Future<void> _handleLogout() async {
+    try {
+      await _authService.signOut();
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to logout right now. Please try again.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: _currentIndex,
       onNavigationChanged: _onNavigationChanged,
+      onLogout: _handleLogout,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            _buildHeader(),
-            _buildAlertsList(),
-          ],
-        ),
+        child: CustomScrollView(slivers: [_buildHeader(), _buildAlertsList()]),
       ),
     );
   }
@@ -102,10 +127,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 ),
                 const Text(
                   '  •  ',
-                  style: TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
                 ),
                 Text(
                   '$warningCount warning',
@@ -130,11 +152,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.check_circle_outline,
-                size: 64,
-                color: AppColors.safe,
-              ),
+              Icon(Icons.check_circle_outline, size: 64, color: AppColors.safe),
               const SizedBox(height: 16),
               const Text(
                 'No Active Alerts',
@@ -147,10 +165,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
               const SizedBox(height: 8),
               const Text(
                 'All systems are operating normally',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
               ),
             ],
           ),
@@ -161,22 +176,19 @@ class _AlertsScreenState extends State<AlertsScreen> {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final alert = _alerts[index];
-            return AlertCard(
-              alert: alert,
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.alertDetail,
-                  arguments: alert,
-                );
-              },
-            );
-          },
-          childCount: _alerts.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final alert = _alerts[index];
+          return AlertCard(
+            alert: alert,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.alertDetail,
+                arguments: alert,
+              );
+            },
+          );
+        }, childCount: _alerts.length),
       ),
     );
   }

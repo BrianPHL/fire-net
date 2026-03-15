@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/widgets/custom_button.dart';
+import '../auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -11,6 +13,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -47,14 +50,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      await _authService.registerWithEmailAndPassword(
+        name: _nameController.text,
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      
-      // Wala pa auth logic, for navigation only
+      if (!mounted) {
+        return;
+      }
+
       Navigator.pushReplacementNamed(context, AppRoutes.userHome);
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AuthService.getRegisterErrorMessage(error)),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unexpected error. Please try again.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -62,9 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Create Account'),
-      ),
+      appBar: AppBar(title: const Text('Create Account')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -111,10 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Text(
           'Create your account to start monitoring',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
       ],
     );
@@ -205,7 +233,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             _isConfirmPasswordVisible ? Icons.visibility_off : Icons.visibility,
           ),
           onPressed: () {
-            setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible);
+            setState(
+              () => _isConfirmPasswordVisible = !_isConfirmPasswordVisible,
+            );
           },
         ),
       ),
@@ -238,10 +268,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             },
             child: RichText(
               text: const TextSpan(
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 children: [
                   TextSpan(text: 'I agree to the '),
                   TextSpan(
@@ -283,10 +310,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         const Text(
           'Already have an account? ',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         TextButton(
           onPressed: () {

@@ -9,6 +9,7 @@ class AppScaffold extends StatelessWidget {
   final int? currentIndex;
   final ValueChanged<int>? onNavigationChanged;
   final List<Widget>? actions;
+  final VoidCallback? onLogout;
   final PreferredSizeWidget? bottom;
   final bool showBackButton;
 
@@ -20,18 +21,29 @@ class AppScaffold extends StatelessWidget {
     this.currentIndex,
     this.onNavigationChanged,
     this.actions,
+    this.onLogout,
     this.bottom,
     this.showBackButton = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final appBarActions = <Widget>[
+      ...?actions,
+      if (onLogout != null)
+        IconButton(
+          onPressed: onLogout,
+          tooltip: 'Logout',
+          icon: const Icon(Icons.logout),
+        ),
+    ];
+
     return Scaffold(
-      appBar: title != null
+      appBar: title != null || onLogout != null
           ? AppBar(
-              title: Text(title!),
+              title: title != null ? Text(title!) : null,
               automaticallyImplyLeading: showBackButton,
-              actions: actions,
+              actions: appBarActions,
               bottom: bottom,
             )
           : null,
@@ -46,12 +58,7 @@ class AppScaffold extends StatelessWidget {
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: AppColors.borderColor,
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: AppColors.borderColor, width: 1)),
       ),
       child: BottomNavigationBar(
         currentIndex: currentIndex!,

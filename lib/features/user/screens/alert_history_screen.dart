@@ -3,6 +3,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/layouts/app_scaffold.dart';
+import '../../auth/auth_service.dart';
 import '../widgets/alert_card.dart';
 
 /// Alert history screen showing all past alerts with filters
@@ -17,13 +18,14 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
   int _currentIndex = 2;
   String _selectedSeverity = 'All';
   String _selectedTimeRange = 'All Time';
+  final _authService = AuthService();
 
   // Mock data
   final List<Alert> _allAlerts = Alert.getMockAlerts();
 
   void _onNavigationChanged(int index) {
     setState(() => _currentIndex = index);
-    
+
     switch (index) {
       case 0:
         Navigator.pushReplacementNamed(context, AppRoutes.userHome);
@@ -34,6 +36,33 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
       case 2:
         // Already on history
         break;
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await _authService.signOut();
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to logout right now. Please try again.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
     }
   }
 
@@ -53,7 +82,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
       if (_selectedTimeRange != 'All Time') {
         final now = DateTime.now();
         final difference = now.difference(alert.triggeredAt);
-        
+
         if (_selectedTimeRange == 'Today' && difference.inDays > 0) {
           return false;
         }
@@ -74,13 +103,10 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
     return AppScaffold(
       currentIndex: _currentIndex,
       onNavigationChanged: _onNavigationChanged,
+      onLogout: _handleLogout,
       body: SafeArea(
         child: CustomScrollView(
-          slivers: [
-            _buildHeader(),
-            _buildFilters(),
-            _buildAlertsList(),
-          ],
+          slivers: [_buildHeader(), _buildFilters(), _buildAlertsList()],
         ),
       ),
     );
@@ -201,18 +227,18 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
             setState(() => _selectedSeverity = severity);
           },
           backgroundColor: AppColors.cardBackground,
-          selectedColor: severity == 'Danger' 
-              ? AppColors.dangerBackground 
+          selectedColor: severity == 'Danger'
+              ? AppColors.dangerBackground
               : severity == 'Warning'
-                  ? AppColors.warningBackground
-                  : AppColors.primary.withOpacity(0.2),
+              ? AppColors.warningBackground
+              : AppColors.primary.withOpacity(0.2),
           labelStyle: TextStyle(
             color: isSelected
-                ? (severity == 'Danger' 
-                    ? AppColors.danger 
-                    : severity == 'Warning'
-                        ? AppColors.warning
-                        : AppColors.primary)
+                ? (severity == 'Danger'
+                      ? AppColors.danger
+                      : severity == 'Warning'
+                      ? AppColors.warning
+                      : AppColors.primary)
                 : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
@@ -252,11 +278,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Icon(
-                Icons.search_off,
-                size: 64,
-                color: AppColors.textTertiary,
-              ),
+              Icon(Icons.search_off, size: 64, color: AppColors.textTertiary),
               SizedBox(height: 16),
               Text(
                 'No Alerts Found',
@@ -269,10 +291,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
               SizedBox(height: 8),
               Text(
                 'Try adjusting your filters',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
               ),
             ],
           ),
@@ -283,22 +302,19 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
     return SliverPadding(
       padding: const EdgeInsets.all(16.0),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final alert = _filteredAlerts[index];
-            return AlertCard(
-              alert: alert,
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.alertDetail,
-                  arguments: alert,
-                );
-              },
-            );
-          },
-          childCount: _filteredAlerts.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final alert = _filteredAlerts[index];
+          return AlertCard(
+            alert: alert,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.alertDetail,
+                arguments: alert,
+              );
+            },
+          );
+        }, childCount: _filteredAlerts.length),
       ),
     );
   }
