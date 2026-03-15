@@ -14,11 +14,13 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _authService = AuthService();
+  static const _roleOptions = ['user', 'engineer'];
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  String _selectedRole = 'user';
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
@@ -55,13 +57,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
         name: _nameController.text,
         email: _emailController.text.trim(),
         password: _passwordController.text,
+        role: _selectedRole,
       );
 
       if (!mounted) {
         return;
       }
 
-      Navigator.pushReplacementNamed(context, AppRoutes.userHome);
+      final destination = _selectedRole == 'user'
+          ? AppRoutes.userHome
+          : AppRoutes.engineerDashboard;
+
+      Navigator.pushReplacementNamed(context, destination);
     } on FirebaseAuthException catch (error) {
       debugPrint(
         'Register failed: code=${error.code}, message=${error.message}',
@@ -117,6 +124,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _buildPasswordField(),
                 const SizedBox(height: 16),
                 _buildConfirmPasswordField(),
+                const SizedBox(height: 16),
+                _buildRoleSelector(),
                 const SizedBox(height: 24),
                 _buildTermsCheckbox(),
                 const SizedBox(height: 24),
@@ -249,6 +258,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
         if (value != _passwordController.text) {
           return 'Passwords do not match';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildRoleSelector() {
+    return DropdownButtonFormField<String>(
+      value: _selectedRole,
+      decoration: const InputDecoration(
+        labelText: 'Account Type',
+        hintText: 'Select your account type',
+        prefixIcon: Icon(Icons.badge_outlined),
+      ),
+      items: _roleOptions.map((role) {
+        final label = '${role[0].toUpperCase()}${role.substring(1)}';
+        return DropdownMenuItem<String>(value: role, child: Text(label));
+      }).toList(),
+      onChanged: (value) {
+        if (value == null) {
+          return;
+        }
+        setState(() => _selectedRole = value);
+      },
+      validator: (value) {
+        if (value == null || !_roleOptions.contains(value)) {
+          return 'Please select your account type';
         }
         return null;
       },

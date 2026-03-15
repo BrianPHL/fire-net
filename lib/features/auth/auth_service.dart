@@ -20,11 +20,22 @@ class AuthService {
     required String name,
     required String email,
     required String password,
+    required String role,
   }) async {
     final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
+
+    // Role is currently used by the client flow for post-register routing.
+    // Persisting role server-side should be done with a backend/Firestore record.
+    final selectedRole = role.trim().toLowerCase();
+    if (selectedRole != 'user' && selectedRole != 'engineer') {
+      throw FirebaseAuthException(
+        code: 'invalid-role',
+        message: 'Unsupported role selected.',
+      );
+    }
 
     // Profile update should not block successful account creation.
     if (name.trim().isNotEmpty) {
@@ -75,6 +86,8 @@ class AuthService {
         return 'Firebase app configuration is invalid for this platform.';
       case 'network-request-failed':
         return 'Network error. Please check your connection and try again.';
+      case 'invalid-role':
+        return 'Please select either User or Engineer.';
       case 'weak-password':
         return 'Please use a stronger password.';
       case 'too-many-requests':
