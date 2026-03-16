@@ -40,11 +40,15 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text,
       );
 
+      final role = await _authService.getRoleForUser();
+      final destination =
+          role == 'engineer' ? AppRoutes.engineerDashboard : AppRoutes.userHome;
+
       if (!mounted) {
         return;
       }
 
-      Navigator.pushReplacementNamed(context, AppRoutes.userHome);
+      Navigator.pushReplacementNamed(context, destination);
     } on FirebaseAuthException catch (error) {
       if (!mounted) {
         return;

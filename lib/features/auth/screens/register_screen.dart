@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../routes/app_routes.dart';
@@ -81,6 +82,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AuthService.getRegisterErrorMessage(error)),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    } on FirebaseException catch (error) {
+      debugPrint(
+        'Firestore error during register: code=${error.code}, message=${error.message}',
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      final message = error.code == 'failed-precondition'
+          ? 'Cloud Firestore is not initialized for this project. Create a Firestore database in Firebase Console, then try again.'
+          : 'Could not save your profile (${error.code}). Please try again.';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
           backgroundColor: AppColors.danger,
         ),
       );
