@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/layouts/app_scaffold.dart';
@@ -20,6 +22,19 @@ class _SensorsScreenState extends State<SensorsScreen> {
   final _userService = UserService();
 
   Future<void> _handleLogout() async {
+    final confirmed = await ErrorDialogHelper.showConfirmationDialog(
+      context,
+      title: 'Confirm Logout',
+      message: 'Are you sure you want to logout?',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+      isDangerous: true,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
       await _authService.signOut();
 
@@ -32,16 +47,23 @@ class _SensorsScreenState extends State<SensorsScreen> {
         AppRoutes.login,
         (route) => false,
       );
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        AuthService.getLogoutErrorMessage(error),
+      );
     } catch (_) {
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to logout right now. Please try again.'),
-          backgroundColor: AppColors.danger,
-        ),
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        'Unable to logout. Please try again.',
       );
     }
   }
