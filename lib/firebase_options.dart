@@ -21,6 +21,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class DefaultFirebaseOptions {
   // Helper to get env variables (like process.env.KEY in Node.js)
   static String _env(String key) => dotenv.env[key] ?? '';
+  static String? _optionalEnv(String key) {
+    final value = dotenv.env[key];
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+    return value;
+  }
 
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -55,6 +62,7 @@ class DefaultFirebaseOptions {
     authDomain: _env('FIREBASE_AUTH_DOMAIN'),
     storageBucket: _env('FIREBASE_STORAGE_BUCKET'),
     measurementId: _env('FIREBASE_WEB_MEASUREMENT_ID'),
+    databaseURL: _optionalEnv('FIREBASE_DATABASE_URL'),
   );
 
   static FirebaseOptions get android => FirebaseOptions(
@@ -63,6 +71,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: _env('FIREBASE_MESSAGING_SENDER_ID'),
     projectId: _env('FIREBASE_PROJECT_ID'),
     storageBucket: _env('FIREBASE_STORAGE_BUCKET'),
+    databaseURL: _optionalEnv('FIREBASE_DATABASE_URL'),
   );
 
   static FirebaseOptions get ios => FirebaseOptions(
@@ -72,6 +81,7 @@ class DefaultFirebaseOptions {
     projectId: _env('FIREBASE_PROJECT_ID'),
     storageBucket: _env('FIREBASE_STORAGE_BUCKET'),
     iosBundleId: _env('FIREBASE_IOS_BUNDLE_ID'),
+    databaseURL: _optionalEnv('FIREBASE_DATABASE_URL'),
   );
 
   static FirebaseOptions get macos => FirebaseOptions(
@@ -81,6 +91,7 @@ class DefaultFirebaseOptions {
     projectId: _env('FIREBASE_PROJECT_ID'),
     storageBucket: _env('FIREBASE_STORAGE_BUCKET'),
     iosBundleId: _env('FIREBASE_IOS_BUNDLE_ID'),
+    databaseURL: _optionalEnv('FIREBASE_DATABASE_URL'),
   );
 
   static FirebaseOptions get windows => FirebaseOptions(
@@ -91,5 +102,6 @@ class DefaultFirebaseOptions {
     authDomain: _env('FIREBASE_AUTH_DOMAIN'),
     storageBucket: _env('FIREBASE_STORAGE_BUCKET'),
     measurementId: _env('FIREBASE_WINDOWS_MEASUREMENT_ID'),
+    databaseURL: _optionalEnv('FIREBASE_DATABASE_URL'),
   );
 }

@@ -12,6 +12,7 @@ import 'features/user/screens/home_screen.dart';
 import 'features/user/screens/alerts_screen.dart';
 import 'features/user/screens/alert_history_screen.dart';
 import 'features/user/screens/alert_detail_screen.dart';
+import 'features/user/screens/sensors_screen.dart';
 import 'features/user/screens/sensor_detail_screen.dart';
 import 'features/engineer/screens/dashboard_screen.dart';
 import 'features/engineer/screens/sensor_management_screen.dart';
@@ -20,14 +21,12 @@ import 'features/engineer/screens/system_diagnostics_screen.dart';
 import 'models/alert.dart';
 import 'models/sensor_node.dart';
 
-Future <void> main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: '.env');
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const FireNetApp());
 }
 
@@ -50,20 +49,23 @@ class FireNetApp extends StatelessWidget {
       // Auth routes
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
-      
+
       case AppRoutes.register:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
 
       // User routes
       case AppRoutes.userHome:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
-      
+
       case AppRoutes.alerts:
         return MaterialPageRoute(builder: (_) => const AlertsScreen());
-      
+
       case AppRoutes.alertHistory:
         return MaterialPageRoute(builder: (_) => const AlertHistoryScreen());
-      
+
+      case AppRoutes.sensors:
+        return MaterialPageRoute(builder: (_) => const SensorsScreen());
+
       case AppRoutes.alertDetail:
         final alert = settings.arguments as Alert?;
         if (alert != null) {
@@ -72,7 +74,7 @@ class FireNetApp extends StatelessWidget {
           );
         }
         return _errorRoute('Alert not found');
-      
+
       case AppRoutes.sensorDetail:
         final sensor = settings.arguments as SensorNode?;
         if (sensor != null) {
@@ -82,27 +84,22 @@ class FireNetApp extends StatelessWidget {
         }
         // Fallback to mock data if no sensor passed
         return MaterialPageRoute(
-          builder: (_) => SensorDetailScreen(
-            sensor: SensorNode.getMockNodes().first,
-          ),
+          builder: (_) =>
+              SensorDetailScreen(sensor: SensorNode.getMockNodes().first),
         );
 
       // Engineer routes
       case AppRoutes.engineerDashboard:
-        return MaterialPageRoute(
-          builder: (_) => const DashboardScreen(),
-        );
-      
+        return MaterialPageRoute(builder: (_) => const DashboardScreen());
+
       case AppRoutes.sensorManagement:
         return MaterialPageRoute(
           builder: (_) => const SensorManagementScreen(),
         );
-      
+
       case AppRoutes.systemConfig:
-        return MaterialPageRoute(
-          builder: (_) => const SystemConfigScreen(),
-        );
-      
+        return MaterialPageRoute(builder: (_) => const SystemConfigScreen());
+
       case AppRoutes.systemDiagnostics:
         return MaterialPageRoute(
           builder: (_) => const SystemDiagnosticsScreen(),
