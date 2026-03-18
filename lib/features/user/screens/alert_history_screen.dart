@@ -231,7 +231,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
               ? AppColors.dangerBackground
               : severity == 'Warning'
               ? AppColors.warningBackground
-              : AppColors.primary.withOpacity(0.2),
+              : AppColors.primary.withValues(alpha: 0.2),
           labelStyle: TextStyle(
             color: isSelected
                 ? (severity == 'Danger'
@@ -260,7 +260,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
             setState(() => _selectedTimeRange = timeRange);
           },
           backgroundColor: AppColors.cardBackground,
-          selectedColor: AppColors.primary.withOpacity(0.2),
+          selectedColor: AppColors.primary.withValues(alpha: 0.2),
           labelStyle: TextStyle(
             color: isSelected ? AppColors.primary : AppColors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,

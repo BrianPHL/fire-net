@@ -47,7 +47,7 @@ class NodeManagementCard extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.safe.withOpacity(0.2),
+                                color: AppColors.safe.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -285,7 +285,7 @@ class ReadingCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.warningBackground,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.warning.withOpacity(0.6)),
+                border: Border.all(color: AppColors.warning.withValues(alpha: 0.6)),
               ),
               child: const Text(
                 'Unavailable',

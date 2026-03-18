@@ -128,7 +128,7 @@ class ThresholdInput extends StatelessWidget {
             color: AppColors.cardBackgroundLight,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -158,7 +158,7 @@ class ThresholdInput extends StatelessWidget {
             activeTrackColor: color,
             inactiveTrackColor: AppColors.cardBackgroundLight,
             thumbColor: color,
-            overlayColor: color.withOpacity(0.2),
+            overlayColor: color.withValues(alpha: 0.2),
             trackHeight: 4,
           ),
           child: Slider(

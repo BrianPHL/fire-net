@@ -25,7 +25,7 @@ class SystemStatusCard extends StatelessWidget {
                   width: iconSize,
                   height: iconSize,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.2),
+                    color: AppColors.primary.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

@@ -164,7 +164,7 @@ class SensorCard extends StatelessWidget {
                         color: AppColors.warningBackground,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: AppColors.warning.withOpacity(0.6),
+                          color: AppColors.warning.withValues(alpha: 0.6),
                         ),
                       ),
                       child: const Text(

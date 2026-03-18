@@ -46,7 +46,7 @@ class NodeHealthCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.safe.withOpacity(0.2),
+                    color: AppColors.safe.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
