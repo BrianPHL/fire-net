@@ -3,6 +3,7 @@ import '../../../shared/layouts/engineer_scaffold.dart';
 import '../../../models/sensor_node.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
+import '../engineer_service.dart';
 import '../widgets/system_stat_card.dart';
 import '../widgets/active_alerts_panel.dart';
 import '../widgets/node_status_section.dart';
@@ -10,9 +11,10 @@ import '../widgets/node_status_section.dart';
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
+  static final EngineerService _engineerService = EngineerService();
+
   @override
   Widget build(BuildContext context) {
-    final nodes = SensorNode.getMockNodes();
     final alerts = Alert.getMockAlerts();
     final activeAlerts = alerts.where((a) => a.isActive).toList();
 
@@ -32,74 +34,94 @@ class DashboardScreen extends StatelessWidget {
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 900;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'System Overview',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                
-                // System stats cards
-                if (isWideScreen)
-                  Row(
-                    children: [
-                      Expanded(child: SystemStatCard(
-                        icon: Icons.router,
-                        value: '${nodes.length}/${nodes.length}',
-                        label: 'Nodes Online',
-                      )),
-                      const SizedBox(width: 16),
-                      Expanded(child: SystemStatCard(
-                        icon: Icons.battery_charging_full,
-                        value: _calculateAvgBattery(nodes),
-                        label: 'Avg Battery',
-                      )),
-                      const SizedBox(width: 16),
-                      Expanded(child: SystemStatCard(
-                        icon: Icons.signal_cellular_alt,
-                        value: _calculateAvgSignal(nodes),
-                        label: 'Avg Signal',
-                      )),
-                    ],
-                  )
-                else
-                  Column(
-                    children: [
-                      SystemStatCard(
-                        icon: Icons.router,
-                        value: '${nodes.length}/${nodes.length}',
-                        label: 'Nodes Online',
-                      ),
-                      const SizedBox(height: 12),
-                      SystemStatCard(
-                        icon: Icons.battery_charging_full,
-                        value: _calculateAvgBattery(nodes),
-                        label: 'Avg Battery',
-                      ),
-                      const SizedBox(height: 12),
-                      SystemStatCard(
-                        icon: Icons.signal_cellular_alt,
-                        value: _calculateAvgSignal(nodes),
-                        label: 'Avg Signal',
-                      ),
-                    ],
+          return StreamBuilder<List<SensorNode>>(
+            stream: _engineerService.streamSensorNodes(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Text('Failed to load live sensor data.'),
                   ),
+                );
+              }
 
-                const SizedBox(height: 24),
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                // Active System Alerts
-                ActiveAlertsPanel(alerts: activeAlerts),
+              final nodes = snapshot.data ?? <SensorNode>[];
 
-                const SizedBox(height: 24),
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'System Overview',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 16),
 
-                // Node Status
-                NodeStatusSection(nodes: nodes),
-              ],
-            ),
+                    // System stats cards
+                    if (isWideScreen)
+                      Row(
+                        children: [
+                          Expanded(child: SystemStatCard(
+                            icon: Icons.router,
+                            value: '${nodes.length}/${nodes.length}',
+                            label: 'Nodes Online',
+                          )),
+                          const SizedBox(width: 16),
+                          Expanded(child: SystemStatCard(
+                            icon: Icons.battery_charging_full,
+                            value: _calculateAvgBattery(nodes),
+                            label: 'Avg Battery',
+                          )),
+                          const SizedBox(width: 16),
+                          Expanded(child: SystemStatCard(
+                            icon: Icons.signal_cellular_alt,
+                            value: _calculateAvgSignal(nodes),
+                            label: 'Avg Signal',
+                          )),
+                        ],
+                      )
+                    else
+                      Column(
+                        children: [
+                          SystemStatCard(
+                            icon: Icons.router,
+                            value: '${nodes.length}/${nodes.length}',
+                            label: 'Nodes Online',
+                          ),
+                          const SizedBox(height: 12),
+                          SystemStatCard(
+                            icon: Icons.battery_charging_full,
+                            value: _calculateAvgBattery(nodes),
+                            label: 'Avg Battery',
+                          ),
+                          const SizedBox(height: 12),
+                          SystemStatCard(
+                            icon: Icons.signal_cellular_alt,
+                            value: _calculateAvgSignal(nodes),
+                            label: 'Avg Signal',
+                          ),
+                        ],
+                      ),
+
+                    const SizedBox(height: 24),
+
+                    // Active System Alerts
+                    ActiveAlertsPanel(alerts: activeAlerts),
+
+                    const SizedBox(height: 24),
+
+                    // Node Status
+                    NodeStatusSection(nodes: nodes),
+                  ],
+                ),
+              );
+            },
           );
         },
       ),

@@ -118,8 +118,25 @@ class NodeManagementCard extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ReadingCard(
+                          icon: Icons.water_drop,
+                          value: node.hasHumidityReading
+                              ? node.humidity.toStringAsFixed(0)
+                              : 'N/A',
+                          label: 'Humidity',
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ReadingCard(
                           icon: Icons.smoke_free,
-                          value: node.smoke.toStringAsFixed(0),
+                          value: node.hasSmokeReading
+                              ? node.smoke.toStringAsFixed(0)
+                              : 'N/A',
                           label: 'Smoke',
                           color: AppColors.smokeColor,
                         ),
@@ -246,6 +263,8 @@ class ReadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isUnavailable = value == 'N/A';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -260,12 +279,30 @@ class ReadingCard extends StatelessWidget {
             size: 28,
           ),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+          if (isUnavailable)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.warningBackground,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.warning.withOpacity(0.6)),
+              ),
+              child: const Text(
+                'Unavailable',
+                style: TextStyle(
+                  color: AppColors.warning,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            )
+          else
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
           const SizedBox(height: 2),
           Text(
             label,
