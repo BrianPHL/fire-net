@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/helpers.dart';
 import '../../routes/app_routes.dart';
+import '../../features/auth/auth_service.dart';
 
 class EngineerScaffold extends StatelessWidget {
+  static final AuthService _authService = AuthService();
+
   final String? title;
   final Widget body;
   final Widget? floatingActionButton;
@@ -23,6 +27,44 @@ class EngineerScaffold extends StatelessWidget {
     this.showBackButton = false,
     this.onLogout,
   });
+
+  Future<void> _handleDefaultLogout(BuildContext context) async {
+    final confirmed = await ErrorDialogHelper.showConfirmationDialog(
+      context,
+      title: 'Confirm Logout',
+      message: 'Are you sure you want to logout?',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+      isDangerous: true,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await _authService.signOut();
+
+      if (!context.mounted) {
+        return;
+      }
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+    } on Exception {
+      if (!context.mounted) {
+        return;
+      }
+
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        'Unable to logout. Please try again.',
+      );
+    }
+  }
 
   void _onNavigationChanged(BuildContext context, int index) {
     if (index == currentIndex) return;
@@ -50,14 +92,15 @@ class EngineerScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logoutAction = onLogout ?? () => _handleDefaultLogout(context);
+
     final appBarActions = <Widget>[
       ...?actions,
-      if (onLogout != null)
-        IconButton(
-          onPressed: onLogout,
-          tooltip: 'Logout',
-          icon: const Icon(Icons.logout),
-        ),
+      IconButton(
+        onPressed: logoutAction,
+        tooltip: 'Logout',
+        icon: const Icon(Icons.logout),
+      ),
     ];
 
     return Scaffold(

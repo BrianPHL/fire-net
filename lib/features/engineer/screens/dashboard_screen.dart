@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../../shared/layouts/engineer_scaffold.dart';
-import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
-import '../../auth/auth_service.dart';
 import '../engineer_service.dart';
 import '../widgets/system_stat_card.dart';
 import '../widgets/active_alerts_panel.dart';
@@ -20,54 +17,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   static final EngineerService _engineerService = EngineerService();
-  final _authService = AuthService();
-
-  Future<void> _handleLogout() async {
-    final confirmed = await ErrorDialogHelper.showConfirmationDialog(
-      context,
-      title: 'Confirm Logout',
-      message: 'Are you sure you want to logout?',
-      confirmText: 'Logout',
-      cancelText: 'Cancel',
-      isDangerous: true,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await _authService.signOut();
-
-      if (!mounted) {
-        return;
-      }
-
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.login,
-        (route) => false,
-      );
-    } on FirebaseAuthException catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ErrorDialogHelper.showSnackbarError(
-        context,
-        AuthService.getLogoutErrorMessage(error),
-      );
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-
-      ErrorDialogHelper.showSnackbarError(
-        context,
-        'Unable to logout. Please try again.',
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +26,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return EngineerScaffold(
       title: 'Engineer Panel',
       currentIndex: 0,
-      onLogout: _handleLogout,
       actions: [
         IconButton(
           icon: const Icon(Icons.settings),
