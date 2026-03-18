@@ -8,11 +8,7 @@ class SensorCard extends StatelessWidget {
   final SensorNode sensor;
   final VoidCallback? onTap;
 
-  const SensorCard({
-    super.key,
-    required this.sensor,
-    this.onTap,
-  });
+  const SensorCard({super.key, required this.sensor, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -105,48 +101,92 @@ class SensorCard extends StatelessWidget {
   }
 
   Widget _buildReadings() {
-    return Row(
+    return Column(
       children: [
-        _buildReadingItem(
-          Icons.thermostat,
-          AppColors.temperatureColor,
-          sensor.temperature,
-          '°',
+        Row(
+          children: [
+            _buildReadingItem(
+              Icons.thermostat,
+              AppColors.temperatureColor,
+              '${sensor.temperature.toStringAsFixed(1)}°',
+            ),
+            const SizedBox(width: 16),
+            _buildReadingItem(
+              Icons.water_drop,
+              AppColors.primary,
+              '${sensor.humidity.toStringAsFixed(1)}%',
+              isUnavailable: !sensor.hasHumidityReading,
+            ),
+          ],
         ),
-        const SizedBox(width: 16),
-        _buildReadingItem(
-          Icons.cloud,
-          AppColors.smokeColor,
-          sensor.smoke,
-          '',
-        ),
-        const SizedBox(width: 16),
-        _buildReadingItem(
-          Icons.local_fire_department,
-          AppColors.gasColor,
-          sensor.gas,
-          '',
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            _buildReadingItem(
+              Icons.smoke_free,
+              AppColors.smokeColor,
+              sensor.hasSmokeReading ? sensor.smoke.toStringAsFixed(1) : 'N/A',
+              isUnavailable: !sensor.hasSmokeReading,
+            ),
+            const SizedBox(width: 16),
+            _buildReadingItem(
+              Icons.local_fire_department,
+              AppColors.gasColor,
+              sensor.gas.toStringAsFixed(1),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildReadingItem(IconData icon, Color color, double value, String unit) {
+  Widget _buildReadingItem(
+    IconData icon,
+    Color color,
+    String value,
+    {bool isUnavailable = false}
+  ) {
     return Expanded(
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
-              '${value.toStringAsFixed(1)}$unit',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: isUnavailable
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.warningBackground,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.warning.withOpacity(0.6),
+                        ),
+                      ),
+                      child: const Text(
+                        'Unavailable',
+                        style: TextStyle(
+                          color: AppColors.warning,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  )
+                : Text(
+                    value,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
           ),
         ],
       ),
@@ -156,18 +196,11 @@ class SensorCard extends StatelessWidget {
   Widget _buildFooter() {
     return Row(
       children: [
-        const Icon(
-          Icons.access_time,
-          size: 14,
-          color: AppColors.textTertiary,
-        ),
+        const Icon(Icons.access_time, size: 14, color: AppColors.textTertiary),
         const SizedBox(width: 4),
         Text(
           'Updated ${Helpers.getRelativeTime(sensor.lastUpdated)}',
-          style: const TextStyle(
-            color: AppColors.textTertiary,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
         ),
         const Spacer(),
         const Text(
@@ -179,11 +212,7 @@ class SensorCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        const Icon(
-          Icons.arrow_forward_ios,
-          size: 12,
-          color: AppColors.primary,
-        ),
+        const Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.primary),
       ],
     );
   }

@@ -6,6 +6,7 @@ import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/layouts/app_scaffold.dart';
 import '../../auth/auth_service.dart';
+import '../user_service.dart';
 import '../widgets/sensor_card.dart';
 import '../widgets/hazard_indicator.dart';
 
@@ -20,9 +21,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final _authService = AuthService();
+  final _userService = UserService();
 
-  // Mock data - in real app, this would come from state management
-  final List<SensorNode> _sensors = SensorNode.getMockNodes();
+  List<SensorNode> _lastKnownSensors = const <SensorNode>[];
   final List<Alert> _alerts = Alert.getMockAlerts();
 
   void _onNavigationChanged(int index) {
@@ -74,22 +75,40 @@ class _HomeScreenState extends State<HomeScreen> {
       currentIndex: _currentIndex,
       onNavigationChanged: _onNavigationChanged,
       onLogout: _handleLogout,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildEmergencyBanner(),
-              const SizedBox(height: 24),
-              _buildStatusCards(),
-              const SizedBox(height: 24),
-              _buildSensorNetwork(),
-            ],
-          ),
-        ),
+      body: StreamBuilder<List<SensorNode>>(
+        stream: _userService.streamSensorNodes(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            _lastKnownSensors = snapshot.data!;
+          }
+
+          final sensors = snapshot.data ?? _lastKnownSensors;
+
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 24),
+                  _buildEmergencyBanner(),
+                  const SizedBox(height: 24),
+                  _buildStatusCards(sensors),
+                  const SizedBox(height: 24),
+                  _buildRealtimeBanner(),
+                  const SizedBox(height: 16),
+                  _buildSensorNetwork(
+                    sensors,
+                    hasError: snapshot.hasError,
+                    isWaiting:
+                        snapshot.connectionState == ConnectionState.waiting,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -221,9 +240,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatusCards() {
+  Widget _buildStatusCards(List<SensorNode> sensors) {
     final activeAlerts = _alerts.where((a) => a.isActive).length;
-    final dangerNodes = _sensors.where((s) => s.status == 'danger').length;
+    final dangerNodes = sensors.where((s) => s.status == 'danger').length;
 
     return Row(
       children: [
@@ -248,8 +267,73 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSensorNetwork() {
-    final activeNodes = _sensors.length;
+  Widget _buildRealtimeBanner() {
+    return StreamBuilder<bool>(
+      stream: _userService.streamFirebaseConnection(),
+      builder: (context, snapshot) {
+        final connected = snapshot.data ?? false;
+        final color = connected ? AppColors.safe : AppColors.warning;
+        final bg = connected
+            ? AppColors.safeBackground
+            : AppColors.warningBackground;
+        final text = connected
+            ? 'Firebase connected: live sensor stream active'
+            : 'Firebase disconnected: showing last known data';
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.6)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                connected ? Icons.wifi : Icons.wifi_off,
+                color: color,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSensorNetwork(
+    List<SensorNode> sensors, {
+    required bool hasError,
+    required bool isWaiting,
+  }) {
+    if (hasError) {
+      return const Text(
+        'Failed to load sensor data from Firebase.',
+        style: TextStyle(
+          color: AppColors.danger,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    }
+
+    final activeNodes = sensors.length;
+
+    if (sensors.isEmpty && isWaiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,24 +367,33 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _sensors.length,
-          itemBuilder: (context, index) {
-            final sensor = _sensors[index];
-            return SensorCard(
-              sensor: sensor,
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.sensorDetail,
-                  arguments: sensor,
-                );
-              },
-            );
-          },
-        ),
+        if (sensors.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              'No sensor data yet. Start ESP32 upload to Firebase.',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            ),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: sensors.length,
+            itemBuilder: (context, index) {
+              final sensor = sensors[index];
+              return SensorCard(
+                sensor: sensor,
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.sensorDetail,
+                    arguments: sensor,
+                  );
+                },
+              );
+            },
+          ),
       ],
     );
   }

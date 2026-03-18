@@ -9,10 +9,7 @@ import '../../../models/alert.dart';
 class SensorDetailScreen extends StatelessWidget {
   final SensorNode sensor;
 
-  const SensorDetailScreen({
-    super.key,
-    required this.sensor,
-  });
+  const SensorDetailScreen({super.key, required this.sensor});
 
   @override
   Widget build(BuildContext context) {
@@ -129,14 +126,30 @@ class SensorDetailScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildReadingCard(
-                'Smoke',
-                sensor.smoke,
-                'ppm',
-                Icons.cloud,
-                AppColors.smokeColor,
+                'Humidity',
+                sensor.humidity,
+                '%',
+                Icons.water_drop,
+                AppColors.primary,
+                isAvailable: sensor.hasHumidityReading,
               ),
             ),
             const SizedBox(width: 12),
+            Expanded(
+              child: _buildReadingCard(
+                'Smoke',
+                sensor.smoke,
+                'ppm',
+                Icons.smoke_free,
+                AppColors.smokeColor,
+                isAvailable: sensor.hasSmokeReading,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
             Expanded(
               child: _buildReadingCard(
                 'Gas',
@@ -158,6 +171,7 @@ class SensorDetailScreen extends StatelessWidget {
     String unit,
     IconData icon,
     Color color,
+    {bool isAvailable = true}
   ) {
     return Card(
       color: AppColors.cardBackgroundLight,
@@ -180,28 +194,54 @@ class SensorDetailScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: value.toStringAsFixed(1),
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
+            if (isAvailable)
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: value.toStringAsFixed(1),
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' $unit',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningBackground,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.warning.withOpacity(0.6),
                     ),
                   ),
-                  TextSpan(
-                    text: ' $unit',
+                  child: const Text(
+                    'Sensor Unavailable',
                     style: TextStyle(
-                      color: color,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      color: AppColors.warning,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -298,11 +338,7 @@ class SensorDetailScreen extends StatelessWidget {
         children: [
           Row(
             children: const [
-              Icon(
-                Icons.lightbulb_outline,
-                color: AppColors.danger,
-                size: 20,
-              ),
+              Icon(Icons.lightbulb_outline, color: AppColors.danger, size: 20),
               SizedBox(width: 8),
               Text(
                 'Alert Explanation',
@@ -496,11 +532,7 @@ class SimpleTrendChartPainter extends CustomPainter {
     // Draw grid lines
     for (int i = 0; i <= 4; i++) {
       final y = size.height * i / 4;
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        gridPaint,
-      );
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
 
     // Find min and max values
