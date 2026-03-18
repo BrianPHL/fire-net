@@ -1,10 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../models/sensor_node.dart';
 
 class UserService {
   UserService({FirebaseDatabase? database})
-    : _database = database ?? FirebaseDatabase.instance;
+    : _database = database ?? _buildDatabase();
 
   final FirebaseDatabase _database;
 
@@ -42,6 +44,18 @@ class UserService {
         .ref('.info/connected')
         .onValue
         .map((event) => event.snapshot.value == true);
+  }
+
+  static FirebaseDatabase _buildDatabase() {
+    final databaseUrl = (dotenv.env['FIREBASE_DATABASE_URL'] ?? '').trim();
+    if (databaseUrl.isEmpty) {
+      return FirebaseDatabase.instance;
+    }
+
+    return FirebaseDatabase.instanceFor(
+      app: Firebase.app(),
+      databaseURL: databaseUrl,
+    );
   }
 
   bool _isSingleNodePayload(Map<dynamic, dynamic> value) {

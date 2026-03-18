@@ -23,15 +23,52 @@ import 'models/sensor_node.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  String? startupError;
 
-  await dotenv.load(fileName: '.env');
+  try {
+    await dotenv.load(fileName: '.env');
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const FireNetApp());
+    final missingKeys = _requiredFirebaseEnvKeys
+        .where((key) => (dotenv.env[key] ?? '').trim().isEmpty)
+        .toList();
+
+    if (missingKeys.isNotEmpty) {
+      throw StateError(
+        'Missing Firebase env keys: ${missingKeys.join(', ')}',
+      );
+    }
+
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } on FirebaseException catch (error) {
+      if (error.code != 'duplicate-app') {
+        rethrow;
+      }
+    }
+  } catch (error, stackTrace) {
+    debugPrint('Startup initialization failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+    startupError = error.toString();
+  }
+
+  runApp(FireNetApp(startupError: startupError));
 }
 
+const List<String> _requiredFirebaseEnvKeys = [
+  'FIREBASE_PROJECT_ID',
+  'FIREBASE_MESSAGING_SENDER_ID',
+  'FIREBASE_STORAGE_BUCKET',
+  'FIREBASE_DATABASE_URL',
+  'FIREBASE_ANDROID_API_KEY',
+  'FIREBASE_ANDROID_APP_ID',
+];
+
 class FireNetApp extends StatelessWidget {
-  const FireNetApp({super.key});
+  const FireNetApp({super.key, this.startupError});
+
+  final String? startupError;
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +76,11 @@ class FireNetApp extends StatelessWidget {
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      initialRoute: AppRoutes.initial,
-      onGenerateRoute: _onGenerateRoute,
+      home: startupError == null
+          ? null
+          : StartupErrorScreen(errorMessage: startupError!),
+      initialRoute: startupError == null ? AppRoutes.initial : null,
+      onGenerateRoute: startupError == null ? _onGenerateRoute : null,
     );
   }
 
@@ -134,6 +174,53 @@ class FireNetApp extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class StartupErrorScreen extends StatelessWidget {
+  const StartupErrorScreen({super.key, required this.errorMessage});
+
+  final String errorMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(title: const Text('Startup Error')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              size: 64,
+              color: AppColors.danger,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'App failed to initialize.',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              errorMessage,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
