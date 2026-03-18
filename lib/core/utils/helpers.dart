@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../constants/app_constants.dart';
+import '../theme/app_colors.dart';
 
 class Helpers {
   Helpers._();
@@ -57,5 +59,132 @@ class Helpers {
   /// Format sensor reading with unit
   static String formatSensorReading(double value, String unit) {
     return '${value.toStringAsFixed(1)} $unit';
+  }
+}
+
+// Helper for showing error dialogs and confirmation dialogs consistently
+class ErrorDialogHelper {
+  ErrorDialogHelper._();
+
+  // Show a snackbar for minor errors
+  static void showSnackbarError(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.danger,
+        duration: duration,
+      ),
+    );
+  }
+
+  // Show a snackbar for success messages
+  static void showSnackbarSuccess(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.safe,
+        duration: duration,
+      ),
+    );
+  }
+
+  // Show a dialog for critical errors
+  static Future<void> showErrorDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+    VoidCallback? onDismiss,
+  }) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onDismiss?.call();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Returns true if confirmed, false if cancelled
+  static Future<bool> showConfirmationDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+    String confirmText = 'Confirm',
+    String cancelText = 'Cancel',
+    bool isDangerous = false,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(cancelText),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(
+                foregroundColor: isDangerous ? AppColors.danger : null,
+              ),
+              child: Text(confirmText),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result ?? false;
+  }
+
+  // Show a dialog with a loading indicator
+  static void showLoadingDialog(
+    BuildContext context, {
+    String message = 'Loading...',
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(message),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Close the loading dialog
+  static void closeLoadingDialog(BuildContext context) {
+    if (Navigator.of(context).canPop()) {
+      Navigator.pop(context);
+    }
   }
 }

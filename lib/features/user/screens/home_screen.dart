@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
@@ -43,6 +44,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _handleLogout() async {
+    final confirmed = await ErrorDialogHelper.showConfirmationDialog(
+      context,
+      title: 'Confirm Logout',
+      message: 'Are you sure you want to logout?',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+      isDangerous: true,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
       await _authService.signOut();
 
@@ -55,16 +69,23 @@ class _HomeScreenState extends State<HomeScreen> {
         AppRoutes.login,
         (route) => false,
       );
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        AuthService.getLogoutErrorMessage(error),
+      );
     } catch (_) {
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to logout right now. Please try again.'),
-          backgroundColor: AppColors.danger,
-        ),
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        'Unable to logout. Please try again.',
       );
     }
   }
@@ -194,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.danger.withOpacity(0.2),
+                    color: AppColors.danger.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(

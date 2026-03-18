@@ -10,6 +10,7 @@ class EngineerScaffold extends StatelessWidget {
   final List<Widget>? actions;
   final PreferredSizeWidget? bottom;
   final bool showBackButton;
+  final VoidCallback? onLogout;
 
   const EngineerScaffold({
     super.key,
@@ -20,6 +21,7 @@ class EngineerScaffold extends StatelessWidget {
     this.actions,
     this.bottom,
     this.showBackButton = false,
+    this.onLogout,
   });
 
   void _onNavigationChanged(BuildContext context, int index) {
@@ -48,12 +50,22 @@ class EngineerScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appBarActions = <Widget>[
+      ...?actions,
+      if (onLogout != null)
+        IconButton(
+          onPressed: onLogout,
+          tooltip: 'Logout',
+          icon: const Icon(Icons.logout),
+        ),
+    ];
+
     return Scaffold(
       appBar: title != null
           ? AppBar(
               title: Text(title!),
               automaticallyImplyLeading: showBackButton,
-              actions: actions,
+              actions: appBarActions,
               bottom: bottom,
             )
           : null,

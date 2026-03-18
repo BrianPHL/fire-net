@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../auth_service.dart';
@@ -42,11 +42,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     if (!_agreeToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please accept the terms and conditions'),
-          backgroundColor: AppColors.danger,
-        ),
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        'Please accept the terms and conditions',
       );
       return;
     }
@@ -79,11 +77,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AuthService.getRegisterErrorMessage(error)),
-          backgroundColor: AppColors.danger,
-        ),
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        AuthService.getRegisterErrorMessage(error),
       );
     } on FirebaseException catch (error) {
       debugPrint(
@@ -95,25 +91,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
 
       final message = error.code == 'failed-precondition'
-          ? 'Cloud Firestore is not initialized for this project. Create a Firestore database in Firebase Console, then try again.'
-          : 'Could not save your profile (${error.code}). Please try again.';
+          ? 'Cloud Firestore is not initialized. Please contact support.'
+          : 'Could not save your profile. Please try again.';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: AppColors.danger,
-        ),
-      );
+      ErrorDialogHelper.showSnackbarError(context, message);
     } catch (_) {
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unexpected error. Please try again.'),
-          backgroundColor: AppColors.danger,
-        ),
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        'Unexpected error. Please try again.',
       );
     } finally {
       if (mounted) {
@@ -286,7 +275,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildRoleSelector() {
     return DropdownButtonFormField<String>(
-      value: _selectedRole,
+      initialValue: _selectedRole,
       decoration: const InputDecoration(
         labelText: 'Account Type',
         hintText: 'Select your account type',

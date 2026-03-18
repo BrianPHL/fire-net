@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../auth_service.dart';
@@ -54,22 +55,18 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AuthService.getLoginErrorMessage(error)),
-          backgroundColor: AppColors.danger,
-        ),
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        AuthService.getLoginErrorMessage(error),
       );
     } catch (_) {
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unexpected error. Please try again.'),
-          backgroundColor: AppColors.danger,
-        ),
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        'Unexpected error. Please try again.',
       );
     } finally {
       if (mounted) {
@@ -121,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: AppColors.danger.withOpacity(0.2),
+            color: AppColors.danger.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
           ),
           child: const Icon(
