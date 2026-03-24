@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../shared/layouts/engineer_scaffold.dart';
+import '../../../shared/widgets/app_section_header.dart';
+import '../../../shared/widgets/status_pill.dart';
 import '../../../models/sensor_node.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
@@ -56,15 +59,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
               }
 
               final nodes = snapshot.data ?? <SensorNode>[];
+              final warningOrDangerNodes = nodes
+                  .where((node) => node.status == 'warning' || node.status == 'danger')
+                  .length;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'System Overview',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    AppSectionHeader(
+                      title: 'System Overview',
+                      subtitle: 'Engineer telemetry and node health at a glance',
+                      trailing: StatusPill(
+                        label: warningOrDangerNodes == 0
+                            ? 'All Stable'
+                            : '$warningOrDangerNodes Need Attention',
+                        color: warningOrDangerNodes == 0
+                            ? AppColors.safe
+                            : AppColors.warning,
+                        backgroundColor: warningOrDangerNodes == 0
+                            ? AppColors.safeBackground
+                            : AppColors.warningBackground,
+                        icon: warningOrDangerNodes == 0
+                            ? Icons.check_circle
+                            : Icons.priority_high,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -72,44 +92,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     if (isWideScreen)
                       Row(
                         children: [
-                          Expanded(child: SystemStatCard(
-                            icon: Icons.router,
-                            value: '${nodes.length}/${nodes.length}',
-                            label: 'Nodes Online',
-                          )),
+                          Expanded(
+                            child: SystemStatCard(
+                              icon: Icons.router,
+                              value: '${nodes.length}/${nodes.length}',
+                              label: 'Nodes Online',
+                            ),
+                          ),
                           const SizedBox(width: 16),
-                          Expanded(child: SystemStatCard(
-                            icon: Icons.battery_charging_full,
-                            value: _calculateAvgBattery(nodes),
-                            label: 'Avg Battery',
-                          )),
+                          Expanded(
+                            child: SystemStatCard(
+                              icon: Icons.battery_charging_full,
+                              value: _calculateAvgBattery(nodes),
+                              label: 'Avg Battery',
+                            ),
+                          ),
                           const SizedBox(width: 16),
-                          Expanded(child: SystemStatCard(
-                            icon: Icons.signal_cellular_alt,
-                            value: _calculateAvgSignal(nodes),
-                            label: 'Avg Signal',
-                          )),
+                          Expanded(
+                            child: SystemStatCard(
+                              icon: Icons.signal_cellular_alt,
+                              value: _calculateAvgSignal(nodes),
+                              label: 'Avg Signal',
+                            ),
+                          ),
                         ],
                       )
                     else
-                      Column(
+                      Row(
                         children: [
-                          SystemStatCard(
-                            icon: Icons.router,
-                            value: '${nodes.length}/${nodes.length}',
-                            label: 'Nodes Online',
+                          Expanded(
+                            child: SystemStatCard(
+                              icon: Icons.router,
+                              value: '${nodes.length}/${nodes.length}',
+                              label: 'Nodes Online',
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          SystemStatCard(
-                            icon: Icons.battery_charging_full,
-                            value: _calculateAvgBattery(nodes),
-                            label: 'Avg Battery',
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SystemStatCard(
+                              icon: Icons.battery_charging_full,
+                              value: _calculateAvgBattery(nodes),
+                              label: 'Avg Battery',
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          SystemStatCard(
-                            icon: Icons.signal_cellular_alt,
-                            value: _calculateAvgSignal(nodes),
-                            label: 'Avg Signal',
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SystemStatCard(
+                              icon: Icons.signal_cellular_alt,
+                              value: _calculateAvgSignal(nodes),
+                              label: 'Avg Signal',
+                            ),
                           ),
                         ],
                       ),

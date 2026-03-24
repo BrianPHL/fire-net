@@ -5,6 +5,8 @@ import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/layouts/app_scaffold.dart';
+import '../../../shared/widgets/app_section_header.dart';
+import '../../../shared/widgets/status_pill.dart';
 import '../../auth/auth_service.dart';
 import '../widgets/alert_card.dart';
 
@@ -107,61 +109,44 @@ class _AlertsScreenState extends State<AlertsScreen> {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.warningBackground,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.notifications,
+                const AppSectionHeader(
+                  title: 'Active Alerts',
+                  subtitle: 'Monitor unresolved warning and danger events',
+                  trailing: StatusPill(
+                    label: 'Live Feed',
                     color: AppColors.warning,
-                    size: 24,
+                    backgroundColor: AppColors.warningBackground,
+                    icon: Icons.notifications_active,
                   ),
                 ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Active Alerts',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    StatusPill(
+                      label: '$dangerCount danger',
+                      color: AppColors.danger,
+                      backgroundColor: AppColors.dangerBackground,
+                      icon: Icons.local_fire_department,
+                    ),
+                    StatusPill(
+                      label: '$warningCount warning',
+                      color: AppColors.warning,
+                      backgroundColor: AppColors.warningBackground,
+                      icon: Icons.warning_amber,
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Text(
-                  '$dangerCount danger',
-                  style: const TextStyle(
-                    color: AppColors.danger,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Text(
-                  '  •  ',
-                  style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
-                ),
-                Text(
-                  '$warningCount warning',
-                  style: const TextStyle(
-                    color: AppColors.warning,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -170,26 +155,31 @@ class _AlertsScreenState extends State<AlertsScreen> {
   Widget _buildAlertsList() {
     if (_alerts.isEmpty) {
       return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.check_circle_outline, size: 64, color: AppColors.safe),
-              const SizedBox(height: 16),
-              const Text(
-                'No Active Alerts',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Card(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.check_circle_outline, size: 64, color: AppColors.safe),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No Active Alerts',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'All systems are operating normally',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'All systems are operating normally',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-            ],
+            ),
           ),
         ),
       );

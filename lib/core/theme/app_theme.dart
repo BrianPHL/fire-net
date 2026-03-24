@@ -9,13 +9,13 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.background,
+      visualDensity: VisualDensity.adaptivePlatformDensity,
       
       // Color scheme
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
         secondary: AppColors.primaryDark,
         surface: AppColors.cardBackground,
-        background: AppColors.background,
         error: AppColors.danger,
       ),
 
@@ -28,7 +28,7 @@ class AppTheme {
         titleTextStyle: TextStyle(
           color: AppColors.textPrimary,
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
         ),
       ),
 
@@ -37,9 +37,10 @@ class AppTheme {
         color: AppColors.cardBackground,
         elevation: 0,
         shape: RoundedRectangleBorder(
+          side: const BorderSide(color: AppColors.borderColor),
           borderRadius: BorderRadius.circular(16),
         ),
-        margin: const EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 6),
       ),
 
       // Text theme
@@ -65,8 +66,8 @@ class AppTheme {
           color: AppColors.textPrimary,
         ),
         titleLarge: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 19,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         titleMedium: TextStyle(
@@ -146,6 +147,29 @@ class AppTheme {
         elevation: 0,
         selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: TextStyle(fontSize: 12),
+      ),
+
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.cardBackgroundLight,
+        selectedColor: AppColors.primary.withValues(alpha: 0.2),
+        side: const BorderSide(color: AppColors.borderColor),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        labelStyle: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textSecondary,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      ),
+
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.cardBackgroundLight,
+        contentTextStyle: const TextStyle(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w500,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
       // Icon theme
