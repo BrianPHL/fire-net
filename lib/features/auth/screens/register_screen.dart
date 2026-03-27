@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/widgets/custom_button.dart';
+import '../../../shared/widgets/firenet_logo.dart';
 import '../auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -150,21 +151,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildHeader() {
-    return const Column(
+    return Column(
       children: [
-        Text(
+        const FireNetLogo(
+          iconSize: 80,
+          fireIconSize: 44,
+          textSize: 24,
+          spacing: 16,
+        ),
+        const SizedBox(height: 24),
+        const Text(
           'Join FireNet',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 28,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           'Create your account to start monitoring',
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+          ),
         ),
       ],
     );

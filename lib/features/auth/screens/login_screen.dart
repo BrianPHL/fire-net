@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/widgets/custom_button.dart';
+import '../../../shared/widgets/firenet_logo.dart';
 import '../auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -112,31 +113,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLogo() {
-    return Column(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: AppColors.danger.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Icon(
-            Icons.local_fire_department,
-            size: 48,
-            color: AppColors.danger,
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          'FireNet',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
+    return const FireNetLogo(
+      iconSize: 100,
+      fireIconSize: 56,
+      textSize: 32,
+      spacing: 20,
     );
   }
 
