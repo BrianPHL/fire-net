@@ -94,7 +94,7 @@ flutter run
 - **Bri** ([BrianPHL](https://github.com/BrianPHL))
 - **Railey** ([raileyyyy](https://github.com/raileyyyy))
 - **Aidan** ([AiD4HN](https://github.com/AiD4HN))
-- **Kyle**
+- **Kyle** ([dykyle](https://github.com/dykyle))
 - **Alaine**
 - [rcpinca.it@tip.edu.ph](url) (Professor)
 
