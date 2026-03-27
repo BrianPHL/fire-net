@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_colors.dart';
 import 'core/constants/app_constants.dart';
+import 'core/screens/splash_screen.dart';
 import 'routes/app_routes.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
@@ -77,9 +78,9 @@ class FireNetApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: startupError == null
-          ? null
+          ? const SplashScreenWrapper()
           : StartupErrorScreen(errorMessage: startupError!),
-      initialRoute: startupError == null ? AppRoutes.initial : null,
+      initialRoute: startupError == null ? null : null,
       onGenerateRoute: startupError == null ? _onGenerateRoute : null,
     );
   }
@@ -177,6 +178,31 @@ class FireNetApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class SplashScreenWrapper extends StatefulWidget {
+  const SplashScreenWrapper({super.key});
+
+  @override
+  State<SplashScreenWrapper> createState() => _SplashScreenWrapperState();
+}
+
+class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // Navigate to login screen after splash screen animation completes
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const SplashScreen();
   }
 }
 
