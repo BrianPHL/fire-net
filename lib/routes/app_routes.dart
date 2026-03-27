@@ -1,6 +1,9 @@
 class AppRoutes {
   AppRoutes._();
 
+  // Onboarding
+  static const String onboarding = '/onboarding';
+
   // Auth routes
   static const String login = '/login';
   static const String register = '/register';
@@ -19,6 +22,6 @@ class AppRoutes {
   static const String systemConfig = '/engineer/system-config';
   static const String systemDiagnostics = '/engineer/system-diagnostics';
 
-  // Initial route
-  static const String initial = login;
+  // Initial route (for onboarding new users)
+  static const String initial = onboarding;
 }

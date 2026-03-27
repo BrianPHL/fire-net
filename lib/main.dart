@@ -7,6 +7,7 @@ import 'core/theme/app_colors.dart';
 import 'core/constants/app_constants.dart';
 import 'core/screens/splash_screen.dart';
 import 'routes/app_routes.dart';
+import 'features/onboarding/screens/onboarding_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/user/screens/home_screen.dart';
@@ -87,6 +88,10 @@ class FireNetApp extends StatelessWidget {
 
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
+      // Onboarding route
+      case AppRoutes.onboarding:
+        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
+
       // Auth routes
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
@@ -192,10 +197,10 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
   @override
   void initState() {
     super.initState();
-    // Navigate to login screen after splash screen animation completes
+    // Navigate to onboarding screen after splash screen animation completes
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+        Navigator.of(context).pushReplacementNamed(AppRoutes.onboarding);
       }
     });
   }
