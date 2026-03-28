@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../models/sensor_node.dart';
@@ -48,7 +47,7 @@ class NodeHealthCard extends StatelessWidget {
                 ),
                 StatusPill(
                   label: 'Online',
-                  color: AppColors.safe,
+                  color: ThemeColors.getSafe(context),
                   backgroundColor: ThemeColors.getSafeBackground(context),
                   icon: Icons.check_circle,
                 ),
@@ -78,7 +77,7 @@ class NodeHealthCard extends StatelessWidget {
                           margin: const EdgeInsets.only(right: 4),
                           decoration: BoxDecoration(
                             color: isActive
-                                ? AppColors.safe
+                                ? ThemeColors.getSafe(context)
                                 : ThemeColors.getCardBackgroundLight(context),
                             borderRadius: BorderRadius.circular(2),
                           ),
@@ -118,7 +117,7 @@ class NodeHealthCard extends StatelessWidget {
                           margin: const EdgeInsets.only(right: 4),
                           decoration: BoxDecoration(
                             color: isActive
-                                ? AppColors.safe
+                                ? ThemeColors.getSafe(context)
                                 : ThemeColors.getCardBackgroundLight(context),
                             borderRadius: BorderRadius.circular(2),
                           ),

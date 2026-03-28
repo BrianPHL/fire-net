@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
@@ -150,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
               subtitle: Helpers.formatDateTime(DateTime.now()),
               trailing: StatusPill(
                 label: 'Live',
-                color: AppColors.safe,
+                color: ThemeColors.getSafe(context),
                 backgroundColor: ThemeColors.getSafeBackground(context),
                 icon: Icons.wifi,
               ),
@@ -176,12 +175,13 @@ class _HomeScreenState extends State<HomeScreen> {
       return const SizedBox.shrink();
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.dangerBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.danger, width: 1),
-      ),
+    return Builder(
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: ThemeColors.getDangerBackground(context),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: ThemeColors.getDanger(context), width: 1),
+        ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -201,12 +201,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.danger.withValues(alpha: 0.2),
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.local_fire_department,
-                    color: AppColors.danger,
+                    color: ThemeColors.getDanger(context),
                     size: 24,
                   ),
                 ),
@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         '1 Active Emergency',
                         style: TextStyle(
-                          color: AppColors.danger,
+                          color: ThemeColors.getDanger(context),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -227,22 +227,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'Tap to view details',
                         style: TextStyle(
-                          color: Theme.of(context).textTheme.bodySmall?.color,
+                          color: ThemeColors.getTextSecondary(context),
                           fontSize: 14,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios,
-                  color: AppColors.danger,
+                  color: ThemeColors.getDanger(context),
                   size: 20,
                 ),
               ],
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -279,10 +280,10 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: _userService.streamFirebaseConnection(),
       builder: (context, snapshot) {
         final connected = snapshot.data ?? false;
-        final color = connected ? AppColors.safe : AppColors.warning;
+        final color = connected ? ThemeColors.getSafe(context) : ThemeColors.getWarning(context);
         final bg = connected
-            ? AppColors.safeBackground
-            : AppColors.warningBackground;
+            ? ThemeColors.getSafeBackground(context)
+            : ThemeColors.getWarningBackground(context);
         final text = connected
             ? 'Firebase connected: live sensor stream active'
             : 'Firebase disconnected: showing last known data';
@@ -292,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: bg,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(32),
             border: Border.all(color: color.withValues(alpha: 0.6)),
           ),
           child: Row(
@@ -326,10 +327,10 @@ class _HomeScreenState extends State<HomeScreen> {
     required bool isWaiting,
   }) {
     if (hasError) {
-      return const Text(
+      return Text(
         'Failed to load sensor data from Firebase.',
         style: TextStyle(
-          color: AppColors.danger,
+          color: ThemeColors.getDanger(context),
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
@@ -342,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final statusColor = hasError ? AppColors.danger : AppColors.safe;
+    final statusColor = hasError ? ThemeColors.getDanger(context) : ThemeColors.getSafe(context);
     final statusLabel = hasError
         ? 'Stream Error'
         : '$activeNodes Nodes Active';
@@ -374,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  const Icon(Icons.sensors_off, color: AppColors.textTertiary),
+                  Icon(Icons.sensors_off, color: ThemeColors.getTextTertiary(context)),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(

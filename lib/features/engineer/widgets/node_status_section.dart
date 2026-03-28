@@ -34,7 +34,7 @@ class NodeStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(node.status);
+    final statusColor = _getStatusColor(node.status, context);
     final statusLabel = _getStatusLabel(node.status);
 
     return Card(
@@ -74,12 +74,12 @@ class NodeStatusCard extends StatelessWidget {
                   StatusPill(
                     label: statusLabel,
                     color: statusColor,
-                    backgroundColor: statusColor == AppColors.safe
+                    backgroundColor: statusColor == ThemeColors.getSafe(context)
                         ? ThemeColors.getSafeBackground(context)
                         : statusColor == AppColors.warning
                             ? ThemeColors.getWarningBackground(context)
                             : ThemeColors.getDangerBackground(context),
-                    icon: statusColor == AppColors.safe
+                    icon: statusColor == ThemeColors.getSafe(context)
                         ? Icons.check_circle
                         : statusColor == AppColors.warning
                             ? Icons.warning_amber
@@ -120,16 +120,16 @@ class NodeStatusCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(String status, BuildContext context) {
     switch (status) {
       case 'safe':
-        return AppColors.safe;
+        return ThemeColors.getSafe(context);
       case 'warning':
-        return AppColors.warning;
+        return ThemeColors.getWarning(context);
       case 'danger':
-        return AppColors.danger;
+        return ThemeColors.getDanger(context);
       default:
-        return AppColors.textSecondary;
+        return ThemeColors.getTextSecondary(context);
     }
   }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
@@ -125,7 +124,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                       subtitle: 'Monitor unresolved warning and danger events',
                       trailing: StatusPill(
                         label: 'Live Feed',
-                        color: AppColors.warning,
+                        color: ThemeColors.getWarning(context),
                         backgroundColor: ThemeColors.getWarningBackground(context),
                         icon: Icons.notifications_active,
                       ),
@@ -141,7 +140,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                       builder: (context, themeProvider, _) {
                         return StatusPill(
                           label: '$dangerCount danger',
-                          color: AppColors.danger,
+                          color: ThemeColors.getDanger(context),
                           backgroundColor: ThemeColors.getDangerBackground(context),
                           icon: Icons.local_fire_department,
                         );
@@ -151,7 +150,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                       builder: (context, themeProvider, _) {
                         return StatusPill(
                           label: '$warningCount warning',
-                          color: AppColors.warning,
+                          color: ThemeColors.getWarning(context),
                           backgroundColor: ThemeColors.getWarningBackground(context),
                           icon: Icons.warning_amber,
                         );
@@ -177,20 +176,20 @@ class _AlertsScreenState extends State<AlertsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle_outline, size: 64, color: AppColors.safe),
+                  Icon(Icons.check_circle_outline, size: 64, color: ThemeColors.getSafe(context)),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'No Active Alerts',
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: ThemeColors.getTextPrimary(context),
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'All systems are operating normally',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                    style: TextStyle(color: ThemeColors.getTextSecondary(context), fontSize: 14),
                   ),
                 ],
               ),

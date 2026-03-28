@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/layouts/engineer_scaffold.dart';
 import '../../../core/theme/app_colors.dart';
 import '../widgets/threshold_card.dart';
+import '../../../core/theme/theme_colors.dart';
 
 class SystemConfigScreen extends StatefulWidget {
   const SystemConfigScreen({super.key});
@@ -144,9 +145,9 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                 onPressed: () {
                   // UI only - no save logic
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text('Settings saved (UI only)'),
-                      backgroundColor: AppColors.safe,
+                      backgroundColor: ThemeColors.getSafe(context),
                     ),
                   );
                 },

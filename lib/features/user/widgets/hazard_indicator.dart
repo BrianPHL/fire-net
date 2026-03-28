@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 
@@ -24,7 +23,7 @@ class HazardIndicator extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, _) {
         return Card(
-          color: AppColors.cardBackgroundLight,
+          color: ThemeColors.getCardBackground(context),
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(16),
@@ -42,15 +41,15 @@ class HazardIndicator extends StatelessWidget {
                     ),
                     child: Icon(
                       _getIcon(),
-                      color: _getColor(),
+                      color: _getColor(context),
                       size: 24,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     count.toString(),
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: ThemeColors.getTextPrimary(context),
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
@@ -58,8 +57,8 @@ class HazardIndicator extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     label,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: ThemeColors.getTextSecondary(context),
                       fontSize: 14,
                     ),
                   ),
@@ -85,29 +84,29 @@ class HazardIndicator extends StatelessWidget {
     }
   }
 
-  Color _getColor() {
+  Color _getColor(BuildContext context) {
     switch (severity) {
       case 'danger':
-        return AppColors.danger;
+        return ThemeColors.getDanger(context);
       case 'warning':
-        return AppColors.warning;
+        return ThemeColors.getWarning(context);
       case 'activity':
-        return AppColors.primary;
+        return ThemeColors.getPrimary(context);
       default:
-        return AppColors.textSecondary;
+        return ThemeColors.getTextSecondary(context);
     }
   }
 
   Color _getBackgroundColor(BuildContext context) {
     switch (severity) {
       case 'danger':
-        return AppColors.dangerBackground;
+        return ThemeColors.getDangerBackground(context);
       case 'warning':
-        return AppColors.warningBackground;
+        return ThemeColors.getWarningBackground(context);
       case 'activity':
         return ThemeColors.getActivityIndicator(context);
       default:
-        return AppColors.cardBackground;
+        return ThemeColors.getCardBackground(context);
     }
   }
 }

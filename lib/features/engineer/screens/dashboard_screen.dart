@@ -81,7 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ? 'All Stable'
                                 : '$warningOrDangerNodes Need Attention',
                             color: warningOrDangerNodes == 0
-                                ? AppColors.safe
+                                ? ThemeColors.getSafe(context)
                                 : AppColors.warning,
                             backgroundColor: warningOrDangerNodes == 0
                                 ? ThemeColors.getSafeBackground(context)

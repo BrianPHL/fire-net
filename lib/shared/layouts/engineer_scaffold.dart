@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/utils/helpers.dart';
@@ -147,8 +146,8 @@ class EngineerScaffold extends StatelessWidget {
         onTap: (index) => _onNavigationChanged(context, index),
         type: BottomNavigationBarType.fixed,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.darkTextSecondary,
+        selectedItemColor: ThemeColors.getPrimary(context),
+        unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color ?? ThemeColors.getTextSecondary(context),
         selectedFontSize: 12,
         unselectedFontSize: 12,
         items: const [

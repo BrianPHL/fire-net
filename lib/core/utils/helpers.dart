@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../constants/app_constants.dart';
 import '../theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
 
 class Helpers {
   Helpers._();
@@ -90,7 +91,7 @@ class ErrorDialogHelper {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.safe,
+        backgroundColor: ThemeColors.getSafe(context),
         duration: duration,
       ),
     );

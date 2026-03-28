@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
+import '../../../shared/widgets/status_pill.dart';
 
 /// Alert card widget for displaying alert information
 class AlertCard extends StatelessWidget {
@@ -50,7 +50,9 @@ class AlertCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           alert.description,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: TextStyle(
+                            color: ThemeColors.getTextSecondary(context)
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -73,7 +75,7 @@ class AlertCard extends StatelessWidget {
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    color: ThemeColors.getTextSecondary(context),
                   ),
                 ],
               ),
@@ -96,27 +98,18 @@ class AlertCard extends StatelessWidget {
       ),
       child: Icon(
         _getIcon(),
-        color: _getIconColor(),
+        color: _getIconColor(context),
         size: 24,
       ),
     );
   }
 
   Widget _buildResolvedBadge(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: ThemeColors.getSafeBackground(context),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        'Resolved • ${Helpers.formatDate(alert.resolvedAt!)}',
-        style: const TextStyle(
-          color: AppColors.safe,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+    return StatusPill(
+      label: 'Resolved • ${Helpers.formatDate(alert.resolvedAt!)}',
+      color: ThemeColors.getSafe(context),
+      backgroundColor: ThemeColors.getSafeBackground(context),
+      icon: Icons.check_circle,
     );
   }
 
@@ -128,14 +121,14 @@ class AlertCard extends StatelessWidget {
     }
   }
 
-  Color _getIconColor() {
+  Color _getIconColor(BuildContext context) {
     switch (alert.severity) {
       case 'danger':
-        return AppColors.danger;
+        return ThemeColors.getDanger(context);
       case 'warning':
-        return AppColors.warning;
+        return ThemeColors.getWarning(context);
       default:
-        return AppColors.primary;
+        return ThemeColors.getPrimary(context);
     }
   }
 

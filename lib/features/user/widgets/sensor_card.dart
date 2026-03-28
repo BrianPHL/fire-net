@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
+import '../../../shared/widgets/status_pill.dart';
 
 /// Sensor card widget for displaying sensor node information
 class SensorCard extends StatelessWidget {
@@ -28,7 +28,7 @@ class SensorCard extends StatelessWidget {
                 children: [
                   _buildHeader(context),
                   const SizedBox(height: 16),
-                  _buildReadings(),
+                  _buildReadings(context),
                   const SizedBox(height: 12),
                   _buildFooter(context),
                 ],
@@ -55,7 +55,7 @@ class SensorCard extends StatelessWidget {
             child: Text(
               sensor.name[0].toUpperCase(),
               style: TextStyle(
-                color: _getStatusColor(),
+                color: _getStatusColor(context),
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -81,39 +81,32 @@ class SensorCard extends StatelessWidget {
           ),
         ),
         // Status badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: _getStatusBackgroundColor(context),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            _getStatusText(),
-            style: TextStyle(
-              color: _getStatusColor(),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        StatusPill(
+          label: _getStatusText(),
+          color: _getStatusColor(context),
+          backgroundColor: _getStatusBackgroundColor(context),
+          icon: _getStatusIcon(),
         ),
       ],
     );
   }
 
-  Widget _buildReadings() {
+  Widget _buildReadings(BuildContext context) {
     return Column(
       children: [
         Row(
           children: [
             _buildReadingItem(
+              context,
               Icons.thermostat,
-              AppColors.temperatureColor,
+              ThemeColors.getTemperatureColor(context),
               '${sensor.temperature.toStringAsFixed(1)}°',
             ),
             const SizedBox(width: 16),
             _buildReadingItem(
+              context,
               Icons.water_drop,
-              AppColors.primary,
+              ThemeColors.getPrimary(context),
               '${sensor.humidity.toStringAsFixed(1)}%',
               isUnavailable: !sensor.hasHumidityReading,
             ),
@@ -123,15 +116,17 @@ class SensorCard extends StatelessWidget {
         Row(
           children: [
             _buildReadingItem(
+              context,
               Icons.smoke_free,
-              AppColors.smokeColor,
+              ThemeColors.getSmokeColor(context),
               sensor.hasSmokeReading ? sensor.smoke.toStringAsFixed(1) : 'N/A',
               isUnavailable: !sensor.hasSmokeReading,
             ),
             const SizedBox(width: 16),
             _buildReadingItem(
+              context,
               Icons.local_fire_department,
-              AppColors.gasColor,
+              ThemeColors.getGasColor(context),
               sensor.gas.toStringAsFixed(1),
             ),
           ],
@@ -141,6 +136,7 @@ class SensorCard extends StatelessWidget {
   }
 
   Widget _buildReadingItem(
+    BuildContext context,
     IconData icon,
     Color color,
     String value,
@@ -150,7 +146,7 @@ class SensorCard extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 6),
+          const SizedBox(width: 4),
           Expanded(
             child: isUnavailable
                 ? Align(
@@ -158,30 +154,20 @@ class SensorCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
-                        vertical: 3,
+                        vertical: 4,
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.warningBackground,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppColors.warning.withValues(alpha: 0.6),
-                        ),
-                      ),
-                      child: const Text(
-                        'Unavailable',
-                        style: TextStyle(
-                          color: AppColors.warning,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                      child: StatusPill(
+                        label: 'Unavailable',
+                        color: ThemeColors.getWarning(context),
+                        backgroundColor: ThemeColors.getWarningBackground(context),
+                        icon: Icons.warning_amber,
                       ),
                     ),
                   )
                 : Text(
                     value,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: ThemeColors.getTextPrimary(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -196,7 +182,7 @@ class SensorCard extends StatelessWidget {
   Widget _buildFooter(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.access_time, size: 14, color: Theme.of(context).textTheme.bodySmall?.color),
+        Icon(Icons.access_time, size: 14, color: ThemeColors.getTextSecondary(context)),
         const SizedBox(width: 4),
         Text(
           'Updated ${Helpers.getRelativeTime(sensor.lastUpdated)}',
@@ -206,25 +192,25 @@ class SensorCard extends StatelessWidget {
         Text(
           'View Details',
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: AppColors.primary,
+            color: ThemeColors.getPrimary(context),
           ),
         ),
         const SizedBox(width: 4),
-        const Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.primary),
+        Icon(Icons.arrow_forward_ios, size: 12, color: ThemeColors.getPrimary(context)),
       ],
     );
   }
 
-  Color _getStatusColor() {
+  Color _getStatusColor(BuildContext context) {
     switch (sensor.status) {
       case 'danger':
-        return AppColors.danger;
+        return ThemeColors.getDanger(context);
       case 'warning':
-        return AppColors.warning;
+        return ThemeColors.getWarning(context);
       case 'safe':
-        return AppColors.safe;
+        return ThemeColors.getSafe(context);
       default:
-        return AppColors.primary;
+        return ThemeColors.getPrimary(context);
     }
   }
 
@@ -251,6 +237,19 @@ class SensorCard extends StatelessWidget {
         return 'Safe';
       default:
         return 'Offline';
+    }
+  }
+
+  IconData _getStatusIcon() {
+    switch (sensor.status) {
+      case 'danger':
+        return Icons.error;
+      case 'warning':
+        return Icons.warning_amber;
+      case 'safe':
+        return Icons.check_circle;
+      default:
+        return Icons.help_outline;
     }
   }
 }

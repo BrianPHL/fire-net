@@ -22,7 +22,7 @@ class SensorDetailScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(sensor.name),
         actions: [
@@ -32,7 +32,7 @@ class SensorDetailScreen extends StatelessWidget {
               child: Builder(
                 builder: (context) => StatusPill(
                   label: _getStatusText(),
-                  color: _getStatusColor(),
+                  color: _getStatusColor(context),
                   backgroundColor: _getStatusBackgroundColor(context),
                   icon: _getStatusIcon(),
                 ),
@@ -48,13 +48,13 @@ class SensorDetailScreen extends StatelessWidget {
           children: [
             _buildLocationHeader(),
             const SizedBox(height: 24),
-            _buildReadingsGrid(),
+            _buildReadingsGrid(context),
             const SizedBox(height: 24),
-            _buildChart(),
+            _buildChart(context),
             const SizedBox(height: 24),
-            if (sensor.status == 'danger') _buildAlertExplanation(relatedAlert),
+            if (sensor.status == 'danger') _buildAlertExplanation(context, relatedAlert),
             const SizedBox(height: 16),
-            _buildRecentAlerts(),
+            _buildRecentAlerts(context),
           ],
         ),
       ),
@@ -77,7 +77,7 @@ class SensorDetailScreen extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.location_on,
-                  color: _getStatusColor(),
+                  color: _getStatusColor(context),
                   size: 24,
                 ),
               ),
@@ -88,8 +88,8 @@ class SensorDetailScreen extends StatelessWidget {
                   children: [
                     Text(
                       sensor.location,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: ThemeColors.getTextPrimary(context),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -97,8 +97,8 @@ class SensorDetailScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       'Updated ${Helpers.getRelativeTime(sensor.lastUpdated)}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: ThemeColors.getTextSecondary(context),
                         fontSize: 14,
                       ),
                     ),
@@ -112,37 +112,40 @@ class SensorDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildReadingsGrid() {
+  Widget _buildReadingsGrid(BuildContext context) {
     return Column(
       children: [
         _buildReadingCard(
+          context,
           'Temperature',
           sensor.temperature,
           '°C',
           Icons.thermostat,
-          AppColors.temperatureColor,
+          ThemeColors.getTemperatureColor(context),
         ),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: _buildReadingCard(
+                context,
                 'Humidity',
                 sensor.humidity,
                 '%',
                 Icons.water_drop,
-                AppColors.primary,
+                ThemeColors.getPrimary(context),
                 isAvailable: sensor.hasHumidityReading,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildReadingCard(
+                context,
                 'Smoke',
                 sensor.smoke,
                 'ppm',
                 Icons.smoke_free,
-                AppColors.smokeColor,
+                ThemeColors.getSmokeColor(context),
                 isAvailable: sensor.hasSmokeReading,
               ),
             ),
@@ -153,11 +156,12 @@ class SensorDetailScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildReadingCard(
+                context,
                 'Gas',
                 sensor.gas,
                 'ppm',
                 Icons.local_fire_department,
-                AppColors.gasColor,
+                ThemeColors.getPrimary(context),
               ),
             ),
           ],
@@ -167,6 +171,7 @@ class SensorDetailScreen extends StatelessWidget {
   }
 
   Widget _buildReadingCard(
+    BuildContext context,
     String label,
     double value,
     String unit,
@@ -175,7 +180,7 @@ class SensorDetailScreen extends StatelessWidget {
     {bool isAvailable = true}
   ) {
     return Card(
-      color: AppColors.cardBackgroundLight,
+      color: ThemeColors.getCardBackgroundLight(context),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -187,8 +192,8 @@ class SensorDetailScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   label,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: ThemeColors.getTextSecondary(context),
                     fontSize: 14,
                   ),
                 ),
@@ -224,7 +229,7 @@ class SensorDetailScreen extends StatelessWidget {
                 child: Builder(
                   builder: (context) => StatusPill(
                     label: 'Sensor Unavailable',
-                    color: AppColors.warning,
+                    color: ThemeColors.getWarning(context),
                     backgroundColor: ThemeColors.getWarningBackground(context),
                     icon: Icons.warning_amber,
                   ),
@@ -236,7 +241,7 @@ class SensorDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChart() {
+  Widget _buildChart(BuildContext context) {
     final chartData = ChartDataPoint.getMockTemperatureTrend();
 
     return Card(
@@ -245,24 +250,27 @@ class SensorDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               '24h Temperature Trend',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: ThemeColors.getTextPrimary(context),
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 16),
-            // Simple chart representation (in real app, use fl_chart or similar)
             Container(
               height: 200,
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: CustomPaint(
-                painter: SimpleTrendChartPainter(chartData),
+                painter: SimpleTrendChartPainter(
+                  chartData,
+                  chartLineColor: ThemeColors.getChartLine(context),
+                  gridColor: ThemeColors.getChartGrid(context),
+                ),
                 child: Container(),
               ),
             ),
@@ -272,7 +280,7 @@ class SensorDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   '00:00',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textTertiary,
                     fontSize: 12,
                   ),
@@ -313,11 +321,11 @@ class SensorDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAlertExplanation(Alert alert) {
+  Widget _buildAlertExplanation(BuildContext context, Alert alert) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: AppColors.dangerBackground,
+        color: ThemeColors.getDangerBackground(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.danger, width: 1),
       ),
@@ -341,8 +349,8 @@ class SensorDetailScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             alert.explanation ?? alert.description,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: ThemeColors.getTextPrimary(context),
               fontSize: 14,
               height: 1.5,
             ),
@@ -352,7 +360,7 @@ class SensorDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentAlerts() {
+  Widget _buildRecentAlerts(BuildContext context) {
     // Mock data - in real app, fetch related alerts
     final alerts = Alert.getMockAlerts()
         .where((a) => a.nodeId == sensor.id)
@@ -362,10 +370,10 @@ class SensorDetailScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Recent Alerts',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: ThemeColors.getTextPrimary(context),
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -377,17 +385,17 @@ class SensorDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24.0),
               child: Center(
                 child: Column(
-                  children: const [
+                  children: [
                     Icon(
                       Icons.check_circle_outline,
                       size: 48,
-                      color: AppColors.safe,
+                      color: ThemeColors.getSafe(context),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
                       'No recent alerts',
                       style: TextStyle(
-                        color: AppColors.textTertiary,
+                        color: ThemeColors.getTextSecondary(context),
                         fontSize: 14,
                       ),
                     ),
@@ -397,12 +405,12 @@ class SensorDetailScreen extends StatelessWidget {
             ),
           )
         else
-          ...alerts.map((alert) => _buildAlertItem(alert)),
+          ...alerts.map((alert) => _buildAlertItem(context, alert)),
       ],
     );
   }
 
-  Widget _buildAlertItem(Alert alert) {
+  Widget _buildAlertItem(BuildContext context, Alert alert) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -413,8 +421,8 @@ class SensorDetailScreen extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: alert.severity == 'danger'
-                    ? AppColors.dangerBackground
-                    : AppColors.warningBackground,
+                    ? ThemeColors.getDangerBackground(context)
+                    : ThemeColors.getWarningBackground(context),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -434,8 +442,8 @@ class SensorDetailScreen extends StatelessWidget {
                 children: [
                   Text(
                     alert.title,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: ThemeColors.getTextPrimary(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -443,8 +451,8 @@ class SensorDetailScreen extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     Helpers.getRelativeTime(alert.triggeredAt),
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: ThemeColors.getTextSecondary(context),
                       fontSize: 12,
                     ),
                   ),
@@ -457,16 +465,16 @@ class SensorDetailScreen extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor() {
+  Color _getStatusColor(BuildContext context) {
     switch (sensor.status) {
       case 'danger':
-        return AppColors.danger;
+        return ThemeColors.getDanger(context);
       case 'warning':
-        return AppColors.warning;
+        return ThemeColors.getWarning(context);
       case 'safe':
-        return AppColors.safe;
+        return ThemeColors.getSafe(context);
       default:
-        return AppColors.textSecondary;
+        return ThemeColors.getTextSecondary(context);
     }
   }
 
@@ -511,21 +519,27 @@ class SensorDetailScreen extends StatelessWidget {
 /// Simple chart painter for temperature trend
 class SimpleTrendChartPainter extends CustomPainter {
   final List<ChartDataPoint> data;
+  final Color chartLineColor;
+  final Color gridColor;
 
-  SimpleTrendChartPainter(this.data);
+  SimpleTrendChartPainter(
+    this.data, {
+    required this.chartLineColor,
+    required this.gridColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     if (data.isEmpty) return;
 
     final paint = Paint()
-      ..color = AppColors.chartLine
+      ..color = chartLineColor
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
     final gridPaint = Paint()
-      ..color = AppColors.chartGrid
+      ..color = gridColor
       ..strokeWidth = 1;
 
     // Draw grid lines

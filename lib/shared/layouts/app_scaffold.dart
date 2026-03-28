@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/theme/theme_colors.dart';
 import '../../core/theme/theme_provider.dart';
 
 /// App scaffold layout with consistent structure
@@ -72,7 +73,7 @@ class AppScaffold extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).dividerColor,
+            color: ThemeColors.getBorderColor(context),
             width: 1,
           ),
         ),
@@ -80,6 +81,9 @@ class AppScaffold extends StatelessWidget {
       child: BottomNavigationBar(
         currentIndex: currentIndex!,
         onTap: onNavigationChanged,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        selectedItemColor: ThemeColors.getPrimary(context),
+        unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color ?? ThemeColors.getTextSecondary(context),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),

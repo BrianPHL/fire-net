@@ -20,7 +20,7 @@ class NodeManagementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(node.status);
+    final statusColor = _getStatusColor(node.status, context);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -47,7 +47,7 @@ class NodeManagementCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             StatusPill(
                               label: 'Online',
-                              color: AppColors.safe,
+                              color: ThemeColors.getSafe(context),
                               backgroundColor: ThemeColors.getSafeBackground(context),
                               icon: Icons.check_circle,
                             ),
@@ -198,16 +198,16 @@ class NodeManagementCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(String status, BuildContext context) {
     switch (status) {
       case 'safe':
-        return AppColors.safe;
+        return ThemeColors.getSafe(context);
       case 'warning':
-        return AppColors.warning;
+        return ThemeColors.getWarning(context);
       case 'danger':
-        return AppColors.danger;
+        return ThemeColors.getDanger(context);
       default:
-        return AppColors.textSecondary;
+        return ThemeColors.getTextSecondary(context);
     }
   }
 
@@ -339,7 +339,7 @@ class DeviceHealthIndicator extends StatelessWidget {
                 minHeight: 8,
                 backgroundColor: ThemeColors.getCardBackgroundLight(context),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  value >= 70 ? AppColors.safe : value >= 40 ? AppColors.warning : AppColors.danger,
+                  value >= 70 ? ThemeColors.getSafe(context) : value >= 40 ? AppColors.warning : AppColors.danger,
                 ),
               ),
             ),

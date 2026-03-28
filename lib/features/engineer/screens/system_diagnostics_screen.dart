@@ -371,7 +371,7 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, _) {
-        final statusColor = isOnline ? AppColors.safe : AppColors.danger;
+        final statusColor = isOnline ? ThemeColors.getSafe(context) : ThemeColors.getDanger(context);
         final bgColor = isOnline
             ? ThemeColors.getSafeBackground(context)
             : ThemeColors.getDangerBackground(context);

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
+import '../../../shared/widgets/status_pill.dart';
 
 /// Alert detail screen showing comprehensive alert information
 class AlertDetailScreen extends StatelessWidget {
@@ -16,25 +18,20 @@ class AlertDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Alert Details'),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: alert.isActive 
-                  ? AppColors.dangerBackground 
-                  : AppColors.safeBackground,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              alert.isActive ? 'Active' : 'Resolved',
-              style: TextStyle(
-                color: alert.isActive ? AppColors.danger : AppColors.safe,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+          Builder(
+            builder: (context) => Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: StatusPill(
+                label: alert.isActive ? 'Active' : 'Resolved',
+                color: alert.isActive ? ThemeColors.getDanger(context) : ThemeColors.getSafe(context),
+                backgroundColor: alert.isActive 
+                    ? ThemeColors.getDangerBackground(context) 
+                    : ThemeColors.getSafeBackground(context),
+                icon: alert.isActive ? Icons.warning_amber : Icons.check_circle,
               ),
             ),
           ),
@@ -45,11 +42,11 @@ class AlertDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildAlertBanner(),
+            _buildAlertBanner(context),
             const SizedBox(height: 24),
             _buildInfoCard(context),
             const SizedBox(height: 16),
-            _buildExplanationCard(),
+            _buildExplanationCard(context),
             const SizedBox(height: 16),
             _buildSensorNavigation(context),
           ],
@@ -58,14 +55,14 @@ class AlertDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAlertBanner() {
+  Widget _buildAlertBanner(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: _getSeverityBackgroundColor(),
+        color: _getSeverityBackgroundColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _getSeverityColor(), width: 1),
+        border: Border.all(color: _getSeverityColor(context), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,12 +73,12 @@ class AlertDetailScreen extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: _getSeverityColor().withValues(alpha: 0.2),
+                  color: _getSeverityColor(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   _getAlertIcon(),
-                  color: _getSeverityColor(),
+                  color: _getSeverityColor(context),
                   size: 28,
                 ),
               ),
@@ -96,13 +93,13 @@ class AlertDetailScreen extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: _getSeverityColor().withValues(alpha: 0.2),
+                        color: _getSeverityColor(context).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         alert.severity == 'danger' ? 'Danger Alert' : 'Warning Alert',
                         style: TextStyle(
-                          color: _getSeverityColor(),
+                          color: _getSeverityColor(context),
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -117,16 +114,15 @@ class AlertDetailScreen extends StatelessWidget {
           Text(
             alert.title,
             style: TextStyle(
-              color: _getSeverityColor(),
+              color: _getSeverityColor(context),
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
           Text(
             alert.description,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: ThemeColors.getTextPrimary(context),
               fontSize: 16,
             ),
           ),
@@ -143,6 +139,7 @@ class AlertDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInfoRow(
+              context,
               Icons.location_on,
               'Affected Node',
               alert.nodeName,
@@ -152,7 +149,8 @@ class AlertDetailScreen extends StatelessWidget {
             const Divider(height: 1),
             const SizedBox(height: 16),
             _buildInfoRow(
-              Icons.access_time,
+              context,
+              Icons.calendar_today,
               'Triggered',
               Helpers.formatDateTime(alert.triggeredAt),
               null,
@@ -162,6 +160,7 @@ class AlertDetailScreen extends StatelessWidget {
               const Divider(height: 1),
               const SizedBox(height: 16),
               _buildInfoRow(
+                context,
                 Icons.check_circle,
                 'Resolved',
                 Helpers.formatDateTime(alert.resolvedAt!),
@@ -175,6 +174,7 @@ class AlertDetailScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(
+    BuildContext context,
     IconData icon,
     String label,
     String value,
@@ -186,10 +186,10 @@ class AlertDetailScreen extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppColors.cardBackgroundLight,
+            color: ThemeColors.getCardBackgroundLight(context),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: AppColors.textSecondary, size: 20),
+          child: Icon(icon, color: ThemeColors.getTextSecondary(context), size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -198,16 +198,16 @@ class AlertDetailScreen extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: ThemeColors.getTextPrimary(context),
                   fontSize: 12,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: ThemeColors.getTextPrimary(context),
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -229,7 +229,7 @@ class AlertDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExplanationCard() {
+  Widget _buildExplanationCard(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -237,17 +237,17 @@ class AlertDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: const [
+              children: [
                 Icon(
                   Icons.lightbulb_outline,
-                  color: AppColors.textPrimary,
+                  color: ThemeColors.getTextPrimary(context),
                   size: 20,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'Alert Explanation',
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: ThemeColors.getTextPrimary(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -257,8 +257,8 @@ class AlertDetailScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               alert.explanation ?? alert.description,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: ThemeColors.getTextSecondary(context),
                 fontSize: 14,
                 height: 1.5,
               ),
@@ -271,7 +271,7 @@ class AlertDetailScreen extends StatelessWidget {
 
   Widget _buildSensorNavigation(BuildContext context) {
     return Card(
-      color: AppColors.cardBackgroundLight,
+      color: ThemeColors.getCardBackgroundLight(context),
       child: InkWell(
         onTap: () {
           // Navigate to sensor detail - in real app, pass sensor data
@@ -286,42 +286,42 @@ class AlertDetailScreen extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.2),
+                  color: ThemeColors.getPrimary(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.sensors,
-                  color: AppColors.primary,
+                  color: ThemeColors.getPrimary(context),
                   size: 20,
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'View Sensor Details',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: ThemeColors.getTextPrimary(context),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'See real-time readings and trends',
                       style: TextStyle(
-                        color: AppColors.textSecondary,
+                        color: ThemeColors.getTextSecondary(context),
                         fontSize: 14,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios,
-                color: AppColors.primary,
+                color: ThemeColors.getPrimary(context),
                 size: 20,
               ),
             ],
@@ -331,14 +331,14 @@ class AlertDetailScreen extends StatelessWidget {
     );
   }
 
-  Color _getSeverityColor() {
-    return alert.severity == 'danger' ? AppColors.danger : AppColors.warning;
+  Color _getSeverityColor(BuildContext context) {
+    return alert.severity == 'danger' ? ThemeColors.getDanger(context) : ThemeColors.getWarning(context);
   }
 
-  Color _getSeverityBackgroundColor() {
+  Color _getSeverityBackgroundColor(BuildContext context) {
     return alert.severity == 'danger' 
-        ? AppColors.dangerBackground 
-        : AppColors.warningBackground;
+        ? ThemeColors.getDangerBackground(context)
+        : ThemeColors.getWarningBackground(context);
   }
 
   IconData _getAlertIcon() {

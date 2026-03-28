@@ -19,23 +19,20 @@ class StatusPill extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     // In light mode, use transparent background; in dark mode, use provided background
-    final bgColor = isDarkMode ? backgroundColor : Colors.transparent;
-    
-    // In light mode, make text darker; in dark mode, use original color
-    final darkerColor = isDarkMode ? color : _darkenColor(color);
-    
+    final bgColor = isDarkMode ? backgroundColor : backgroundColor;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: darkerColor.withValues(alpha: 0.5)),
+        border: Border.all(color: color),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 14, color: darkerColor),
+            Icon(icon, size: 14, color: color),
             const SizedBox(width: 6),
           ],
           Flexible(
@@ -43,7 +40,7 @@ class StatusPill extends StatelessWidget {
               label,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: darkerColor,
+                color: color,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -53,10 +50,4 @@ class StatusPill extends StatelessWidget {
     );
   }
 
-  /// Darken a color by reducing lightness
-  Color _darkenColor(Color color) {
-    final hsl = HSLColor.fromColor(color);
-    final darkened = hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0));
-    return darkened.toColor();
-  }
 }

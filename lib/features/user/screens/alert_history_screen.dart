@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
@@ -128,13 +128,13 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
       onLogout: _handleLogout,
       body: SafeArea(
         child: CustomScrollView(
-          slivers: [_buildHeader(), _buildFilters(), _buildAlertsList()],
+          slivers: [_buildHeader(context), _buildFilters(context), _buildAlertsList()],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -144,12 +144,12 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.cardBackgroundLight,
+                color: ThemeColors.getCardBackgroundLight(context),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.history,
-                color: AppColors.textPrimary,
+                color: ThemeColors.getTextPrimary(context),
                 size: 24,
               ),
             ),
@@ -157,18 +157,18 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Alert History',
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: ThemeColors.getTextPrimary(context),
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   '${_filteredAlerts.length} alerts found',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: ThemeColors.getTextSecondary(context),
                     fontSize: 14,
                   ),
                 ),
@@ -180,29 +180,29 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Card(
-          color: AppColors.cardBackgroundLight,
+          color: ThemeColors.getCardBackgroundLight(context),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: const [
+                  children: [
                     Icon(
                       Icons.filter_alt,
                       size: 20,
-                      color: AppColors.textPrimary,
+                      color: ThemeColors.getTextPrimary(context),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
                       'Filters',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: ThemeColors.getTextPrimary(context),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -210,25 +210,25 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Severity',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: ThemeColors.getTextSecondary(context),
                     fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildSeverityChips(),
+                _buildSeverityChips(context),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Time Range',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: ThemeColors.getTextSecondary(context),
                     fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildTimeRangeChips(),
+                _buildTimeRangeChips(context),
               ],
             ),
           ),
@@ -237,7 +237,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
     );
   }
 
-  Widget _buildSeverityChips() {
+  Widget _buildSeverityChips(BuildContext context) {
     return Wrap(
       spacing: 8,
       children: ['All', 'Danger', 'Warning'].map((severity) {
@@ -248,20 +248,20 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
           onSelected: (selected) {
             setState(() => _selectedSeverity = severity);
           },
-          backgroundColor: AppColors.cardBackground,
+          backgroundColor: ThemeColors.getCardBackgroundLight(context),
           selectedColor: severity == 'Danger'
-              ? AppColors.dangerBackground
+              ? ThemeColors.getDangerBackground(context)
               : severity == 'Warning'
-              ? AppColors.warningBackground
-              : AppColors.primary.withValues(alpha: 0.2),
+              ? ThemeColors.getWarningBackground(context)
+              : ThemeColors.getPrimary(context).withValues(alpha: 0.2),
           labelStyle: TextStyle(
             color: isSelected
                 ? (severity == 'Danger'
-                      ? AppColors.danger
+                      ? ThemeColors.getDanger(context)
                       : severity == 'Warning'
-                      ? AppColors.warning
-                      : AppColors.primary)
-                : AppColors.textSecondary,
+                      ? ThemeColors.getWarning(context)
+                      : ThemeColors.getPrimary(context))
+                : ThemeColors.getTextSecondary(context),
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
           side: BorderSide.none,
@@ -270,7 +270,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
     );
   }
 
-  Widget _buildTimeRangeChips() {
+  Widget _buildTimeRangeChips(BuildContext context) {
     return Wrap(
       spacing: 8,
       children: ['Today', 'Week', 'Month', 'All Time'].map((timeRange) {
@@ -281,10 +281,10 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
           onSelected: (selected) {
             setState(() => _selectedTimeRange = timeRange);
           },
-          backgroundColor: AppColors.cardBackground,
-          selectedColor: AppColors.primary.withValues(alpha: 0.2),
+          backgroundColor: ThemeColors.getCardBackgroundLight(context),
+          selectedColor: ThemeColors.getPrimary(context).withValues(alpha: 0.2),
           labelStyle: TextStyle(
-            color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            color: isSelected ? ThemeColors.getPrimary(context) : ThemeColors.getTextSecondary(context),
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
           side: BorderSide.none,
@@ -296,26 +296,28 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
   Widget _buildAlertsList() {
     if (_filteredAlerts.isEmpty) {
       return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.search_off, size: 64, color: AppColors.textTertiary),
-              SizedBox(height: 16),
-              Text(
-                'No Alerts Found',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+        child: Builder(
+          builder: (context) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.search_off, size: 64, color: ThemeColors.getTextTertiary(context)),
+                const SizedBox(height: 16),
+                Text(
+                  'No Alerts Found',
+                  style: TextStyle(
+                    color: ThemeColors.getTextPrimary(context),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Try adjusting your filters',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  'Try adjusting your filters',
+                  style: TextStyle(color: ThemeColors.getTextSecondary(context), fontSize: 14),
+                ),
+              ],
+            ),
           ),
         ),
       );
