@@ -44,6 +44,12 @@ dependencies:
   
   # Environment variables (like dotenv in Node.js)
   flutter_dotenv: ^6.0.0
+  
+  # State management
+  provider: ^6.0.0
+  
+  # Local storage
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:

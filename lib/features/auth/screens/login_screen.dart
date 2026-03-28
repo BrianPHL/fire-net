@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -122,26 +122,25 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildTitle() {
-    return const Column(
-      children: [
-        Text(
-          'Welcome Back',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+    return Builder(
+      builder: (context) => Column(
+        children: [
+          Text(
+            'Welcome Back',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        SizedBox(height: 8),
-        Text(
-          'Sign in to monitor your fire detection network',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
+          const SizedBox(height: 8),
+          Text(
+            'Sign in to monitor your fire detection network',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -230,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const Text(
           'Don\'t have an account? ',
           style: TextStyle(
-            color: AppColors.textSecondary,
+            color: AppColors.textTertiary,
             fontSize: 14,
           ),
         ),

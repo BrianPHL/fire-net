@@ -87,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Page view with onboarding slides
@@ -117,7 +117,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     _currentPage > 0
                         ? IconButton(
                             onPressed: _previousPage,
-                            icon: const Icon(Icons.arrow_back_ios),
+                            icon: Icon(
+                              Icons.arrow_back_ios,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
+                            ),
                             color: AppColors.textPrimary,
                           )
                         : const SizedBox(width: 48),
@@ -128,7 +131,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: const Text(
                           'Skip',
                           style: TextStyle(
-                            color: AppColors.textSecondary,
+                            color: AppColors.textTertiary,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -224,14 +227,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       Text(
                                         'Get Started',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: AppColors.darkTextPrimary,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                       Icon(
                                         Icons.arrow_forward_ios,
-                                        color: Colors.white,
+                                        color: AppColors.darkTextPrimary,
                                         size: 16,
                                       ),
                                     ],
@@ -242,7 +245,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       Text(
                                         'Next',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: AppColors.darkTextPrimary,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -250,7 +253,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       SizedBox(width: 8),
                                       Icon(
                                         Icons.arrow_forward_ios,
-                                        color: Colors.white,
+                                        color: AppColors.darkTextPrimary,
                                         size: 16,
                                       ),
                                     ],
@@ -306,34 +309,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ),
 
-        // Title
+        // Title - uses theme-aware text color
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            page.title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+          child: Builder(
+            builder: (context) => Text(
+              page.title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ),
 
         const SizedBox(height: 16),
 
-        // Description
+        // Description - uses theme-aware text color
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            page.description,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.2,
+          child: Builder(
+            builder: (context) => Text(
+              page.description,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                letterSpacing: 0.2,
+              ),
             ),
           ),
         ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 
 /// Hazard indicator widget showing severity status
 class HazardIndicator extends StatelessWidget {
@@ -18,50 +21,54 @@ class HazardIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: AppColors.cardBackgroundLight,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _getBackgroundColor(),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getIcon(),
-                  color: _getColor(),
-                  size: 24,
-                ),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return Card(
+          color: AppColors.cardBackgroundLight,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _getBackgroundColor(context),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      _getIcon(),
+                      color: _getColor(),
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    count.toString(),
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                count.toString(),
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -91,16 +98,17 @@ class HazardIndicator extends StatelessWidget {
     }
   }
 
-  Color _getBackgroundColor() {
+  Color _getBackgroundColor(BuildContext context) {
     switch (severity) {
       case 'danger':
         return AppColors.dangerBackground;
       case 'warning':
         return AppColors.warningBackground;
       case 'activity':
-        return const Color(0xFF1F2D2D);
+        return ThemeColors.getActivityIndicator(context);
       default:
         return AppColors.cardBackground;
     }
   }
 }
+

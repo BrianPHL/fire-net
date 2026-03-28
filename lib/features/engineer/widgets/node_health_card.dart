@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../models/sensor_node.dart';
+import '../../../shared/widgets/status_pill.dart';
 
 class NodeHealthCard extends StatelessWidget {
   final SensorNode node;
@@ -18,11 +22,13 @@ class NodeHealthCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with name and status badge
-            Row(
+        child: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with name and status badge
+                Row(
               children: [
                 Expanded(
                   child: Column(
@@ -40,36 +46,11 @@ class NodeHealthCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.safe.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: AppColors.safe,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Online',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.safe,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
+                StatusPill(
+                  label: 'Online',
+                  color: AppColors.safe,
+                  backgroundColor: ThemeColors.getSafeBackground(context),
+                  icon: Icons.check_circle,
                 ),
               ],
             ),
@@ -79,10 +60,10 @@ class NodeHealthCard extends StatelessWidget {
             // Battery indicator
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.battery_charging_full,
                   size: 20,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -98,7 +79,7 @@ class NodeHealthCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isActive
                                 ? AppColors.safe
-                                : AppColors.cardBackgroundLight,
+                                : ThemeColors.getCardBackgroundLight(context),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         );
@@ -118,10 +99,10 @@ class NodeHealthCard extends StatelessWidget {
             // Signal indicator
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.signal_cellular_alt,
                   size: 20,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -138,7 +119,7 @@ class NodeHealthCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isActive
                                 ? AppColors.safe
-                                : AppColors.cardBackgroundLight,
+                                : ThemeColors.getCardBackgroundLight(context),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         );
@@ -160,7 +141,9 @@ class NodeHealthCard extends StatelessWidget {
               'Last check-in: $lastCheckIn',
               style: Theme.of(context).textTheme.bodySmall,
             ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );

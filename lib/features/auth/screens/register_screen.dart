@@ -115,7 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Create Account')),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -151,33 +151,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildHeader() {
-    return Column(
-      children: [
-        const FireNetLogo(
-          iconSize: 80,
-          fireIconSize: 44,
-          textSize: 24,
-          spacing: 16,
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'Join FireNet',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+    return Builder(
+      builder: (context) => Column(
+        children: [
+          const FireNetLogo(
+            iconSize: 80,
+            fireIconSize: 44,
+            textSize: 24,
+            spacing: 16,
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Create your account to start monitoring',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
+          const SizedBox(height: 24),
+          Text(
+            'Join FireNet',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            'Create your account to start monitoring',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -328,7 +327,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             },
             child: RichText(
               text: const TextSpan(
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
                 children: [
                   TextSpan(text: 'I agree to the '),
                   TextSpan(
@@ -370,7 +369,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         const Text(
           'Already have an account? ',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
         ),
         TextButton(
           onPressed: () {

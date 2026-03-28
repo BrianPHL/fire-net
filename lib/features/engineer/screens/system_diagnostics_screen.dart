@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/layouts/engineer_scaffold.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../models/sensor_node.dart';
+import '../../../shared/widgets/status_pill.dart';
 import '../engineer_service.dart';
 
 class SystemDiagnosticsScreen extends StatelessWidget {
@@ -101,52 +105,59 @@ class _SystemStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF032542), Color(0xFF042A3B)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF0A4A6A)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 92,
-            height: 92,
-            decoration: BoxDecoration(
-              color: const Color(0xFF00BFEA).withValues(alpha: 0.16),
-              shape: BoxShape.circle,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                ThemeColors.getDiagnosticGradientTop(context),
+                ThemeColors.getDiagnosticGradientBottom(context),
+              ],
             ),
-            child: const Center(
-              child: Icon(
-                Icons.check_circle_outline,
-                size: 44,
-                color: Color(0xFF17D9FF),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: ThemeColors.getDiagnosticBorder(context)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 92,
+                height: 92,
+                decoration: BoxDecoration(
+                  color: ThemeColors.getDiagnosticCyanAccent(context).withValues(alpha: 0.16),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.check_circle_outline,
+                    size: 44,
+                    color: ThemeColors.getDiagnosticCyanBright(context),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 20),
+              Text(
+                'System Operational',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: ThemeColors.getDiagnosticCyanLight(context),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'All diagnostic checks passed',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'System Operational',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: const Color(0xFF19DFFF),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'All diagnostic checks passed',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -164,40 +175,44 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111C39),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF1F3258)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            color: ThemeColors.getDiagnosticCardBackground(context),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: ThemeColors.getDiagnosticCardBorder(context)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, size: 16, color: const Color(0xFF22D9FF)),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+              Row(
+                children: [
+                  Icon(icon, size: 16, color: ThemeColors.getDiagnosticCyanIcon(context)),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                value,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -212,51 +227,55 @@ class _NodeHealthCard extends StatelessWidget {
     final batteryLevel = _getBatteryLevel(node.id);
     final signalLevel = _getSignalLevel(node.id);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111C39),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF1E3156)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: ThemeColors.getDiagnosticCardBackground(context),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: ThemeColors.getDiagnosticCardBorder(context)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      node.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          node.name,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          node.location,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      node.location,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+                  ),
+                  _StatusBadge(isOnline: node.status.toLowerCase() != 'offline'),
+                ],
               ),
-              _StatusBadge(isOnline: node.status.toLowerCase() != 'offline'),
+              const SizedBox(height: 14),
+              _MetricRow(icon: Icons.battery_std, value: batteryLevel),
+              const SizedBox(height: 8),
+              _MetricRow(icon: Icons.network_cell, value: signalLevel),
+              const SizedBox(height: 10),
+              Text(
+                'Last check-in: ${_formatLastCheck(node.lastUpdated)}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-          _MetricRow(icon: Icons.battery_std, value: batteryLevel),
-          const SizedBox(height: 8),
-          _MetricRow(icon: Icons.network_cell, value: signalLevel),
-          const SizedBox(height: 10),
-          Text(
-            'Last check-in: ${_formatLastCheck(node.lastUpdated)}',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -309,32 +328,36 @@ class _MetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 15, color: AppColors.textSecondary),
-        const SizedBox(width: 8),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: value / 100,
-              minHeight: 7,
-              backgroundColor: const Color(0xFF233149),
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFF26D89A),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return Row(
+          children: [
+            Icon(icon, size: 15, color: AppColors.textSecondary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: value / 100,
+                  minHeight: 7,
+                  backgroundColor: ThemeColors.getDiagnosticStatusBackground(context),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColors.getDiagnosticTealBright(context),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          '$value %',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+            const SizedBox(width: 10),
+            Text(
+              '$value %',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -346,37 +369,20 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isOnline
-        ? const Color(0xFF123E3A)
-        : AppColors.dangerBackground;
-    final textColor = isOnline ? const Color(0xFF2AE7B3) : AppColors.danger;
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        final statusColor = isOnline ? AppColors.safe : AppColors.danger;
+        final bgColor = isOnline
+            ? ThemeColors.getSafeBackground(context)
+            : ThemeColors.getDangerBackground(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: textColor.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isOnline ? Icons.wifi : Icons.wifi_off,
-            size: 12,
-            color: textColor,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            isOnline ? 'Online' : 'Offline',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
+        return StatusPill(
+          label: isOnline ? 'Online' : 'Offline',
+          color: statusColor,
+          backgroundColor: bgColor,
+          icon: isOnline ? Icons.wifi : Icons.wifi_off,
+        );
+      },
     );
   }
 }

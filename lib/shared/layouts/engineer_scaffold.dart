@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../core/theme/theme_provider.dart';
 import '../../core/utils/helpers.dart';
 import '../../routes/app_routes.dart';
 import '../../features/auth/auth_service.dart';
@@ -92,38 +95,49 @@ class EngineerScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logoutAction = onLogout ?? () => _handleDefaultLogout(context);
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        final logoutAction = onLogout ?? () => _handleDefaultLogout(context);
 
-    final appBarActions = <Widget>[
-      ...?actions,
-      IconButton(
-        onPressed: logoutAction,
-        tooltip: 'Logout',
-        icon: const Icon(Icons.logout),
-      ),
-    ];
+        final appBarActions = <Widget>[
+          ...?actions,
+          IconButton(
+            onPressed: () => themeProvider.toggleTheme(),
+            tooltip: themeProvider.isDarkMode ? 'Light Mode' : 'Dark Mode',
+            icon: Icon(
+              themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            ),
+          ),
+          IconButton(
+            onPressed: logoutAction,
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout),
+          ),
+        ];
 
-    return Scaffold(
-      appBar: title != null
-          ? AppBar(
-              title: Text(title!),
-              automaticallyImplyLeading: showBackButton,
-              actions: appBarActions,
-              bottom: bottom,
-            )
-          : null,
-      body: body,
-      floatingActionButton: floatingActionButton,
-      bottomNavigationBar: _buildBottomNavigationBar(context),
+        return Scaffold(
+          appBar: title != null
+              ? AppBar(
+                  title: Text(title!),
+                  automaticallyImplyLeading: showBackButton,
+                  actions: appBarActions,
+                  bottom: bottom,
+                )
+              : null,
+          body: body,
+          floatingActionButton: floatingActionButton,
+          bottomNavigationBar: _buildBottomNavigationBar(context),
+        );
+      },
     );
   }
 
   Widget _buildBottomNavigationBar(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: AppColors.borderColor,
+            color: ThemeColors.getBorderColor(context),
             width: 1,
           ),
         ),
@@ -132,9 +146,9 @@ class EngineerScaffold extends StatelessWidget {
         currentIndex: currentIndex,
         onTap: (index) => _onNavigationChanged(context, index),
         type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
+        unselectedItemColor: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.darkTextSecondary,
         selectedFontSize: 12,
         unselectedFontSize: 12,
         items: const [
@@ -163,3 +177,4 @@ class EngineerScaffold extends StatelessWidget {
     );
   }
 }
+

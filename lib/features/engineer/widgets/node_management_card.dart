@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../models/sensor_node.dart';
+import '../../../shared/widgets/status_pill.dart';
 
 class NodeManagementCard extends StatelessWidget {
   final SensorNode node;
@@ -41,36 +45,11 @@ class NodeManagementCard extends StatelessWidget {
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.safe.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.safe,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Online',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.safe,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            StatusPill(
+                              label: 'Online',
+                              color: AppColors.safe,
+                              backgroundColor: ThemeColors.getSafeBackground(context),
+                              icon: Icons.check_circle,
                             ),
                           ],
                         ),
@@ -84,7 +63,7 @@ class NodeManagementCard extends StatelessWidget {
                   ),
                   Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                 ],
               ),
@@ -93,129 +72,124 @@ class NodeManagementCard extends StatelessWidget {
 
           // Expanded content
           if (isExpanded) ...[
-            const Divider(height: 1, color: AppColors.borderColor),
+            Divider(height: 1, color: ThemeColors.getBorderColor(context)),
             Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Current Readings
-                  Text(
-                    'Current Readings',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
+              child: Consumer<ThemeProvider>(
+                builder: (context, themeProvider, _) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: ReadingCard(
-                          icon: Icons.thermostat,
-                          value: '${node.temperature.toStringAsFixed(1)}°',
-                          label: 'Temp',
-                          color: AppColors.temperatureColor,
-                        ),
+                      // Current Readings
+                      Text(
+                        'Current Readings',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ReadingCard(
-                          icon: Icons.water_drop,
-                          value: node.hasHumidityReading
-                              ? node.humidity.toStringAsFixed(0)
-                              : 'N/A',
-                          label: 'Humidity',
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ReadingCard(
-                          icon: Icons.smoke_free,
-                          value: node.hasSmokeReading
-                              ? node.smoke.toStringAsFixed(0)
-                              : 'N/A',
-                          label: 'Smoke',
-                          color: AppColors.smokeColor,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ReadingCard(
-                          icon: Icons.science,
-                          value: node.gas.toStringAsFixed(0),
-                          label: 'Gas',
-                          color: AppColors.gasColor,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Device Health
-                  Text(
-                    'Device Health',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  const DeviceHealthIndicator(
-                    icon: Icons.battery_charging_full,
-                    label: 'Battery Level',
-                    value: 87,
-                  ),
-                  const SizedBox(height: 12),
-                  const DeviceHealthIndicator(
-                    icon: Icons.signal_cellular_alt,
-                    label: 'Signal Strength',
-                    value: 92,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Status info
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: statusColor == AppColors.safe
-                          ? AppColors.safeBackground
-                          : statusColor == AppColors.warning
-                              ? AppColors.warningBackground
-                              : AppColors.dangerBackground,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Last updated: ${_formatDateTime(node.lastUpdated)}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: statusColor,
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ReadingCard(
+                              icon: Icons.thermostat,
+                              value: '${node.temperature.toStringAsFixed(1)}°',
+                              label: 'Temp',
+                              color: AppColors.temperatureColor,
                             ),
                           ),
-                        ),
-                        Text(
-                          _getStatusLabel(node.status),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ReadingCard(
+                              icon: Icons.water_drop,
+                              value: node.hasHumidityReading
+                                  ? node.humidity.toStringAsFixed(0)
+                                  : 'N/A',
+                              label: 'Humidity',
+                              color: AppColors.primary,
+                            ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ReadingCard(
+                              icon: Icons.smoke_free,
+                              value: node.hasSmokeReading
+                                  ? node.smoke.toStringAsFixed(0)
+                                  : 'N/A',
+                              label: 'Smoke',
+                              color: AppColors.smokeColor,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ReadingCard(
+                              icon: Icons.science,
+                              value: node.gas.toStringAsFixed(0),
+                              label: 'Gas',
+                              color: AppColors.gasColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Device Health
+                      Text(
+                        'Device Health',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      const DeviceHealthIndicator(
+                        icon: Icons.battery_charging_full,
+                        label: 'Battery Level',
+                        value: 87,
+                      ),
+                      const SizedBox(height: 12),
+                      const DeviceHealthIndicator(
+                        icon: Icons.signal_cellular_alt,
+                        label: 'Signal Strength',
+                        value: 92,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Status info
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: ThemeColors.getBorderColor(context), width: 1),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Last updated: ${_formatDateTime(node.lastUpdated)}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                            StatusPill(
+                              label: _getStatusLabel(node.status),
+                              color: statusColor,
+                              backgroundColor: ThemeColors.getSafeBackground(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -265,51 +239,55 @@ class ReadingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUnavailable = value == 'N/A';
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackgroundLight,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 28,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: ThemeColors.getCardBackgroundLight(context),
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(height: 8),
-          if (isUnavailable)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.warningBackground,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.6)),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 28,
               ),
-              child: const Text(
-                'Unavailable',
-                style: TextStyle(
-                  color: AppColors.warning,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(height: 8),
+              if (isUnavailable)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: ThemeColors.getWarningBackground(context),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.warning.withValues(alpha: 0.6)),
+                  ),
+                  child: const Text(
+                    'Unavailable',
+                    style: TextStyle(
+                      color: AppColors.warning,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-            )
-          else
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -329,41 +307,45 @@ class DeviceHealthIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: AppColors.textSecondary,
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: ThemeColors.getTextSecondary(context),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const Spacer(),
+                Text(
+                  '$value %',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const Spacer(),
-            Text(
-              '$value %',
-              style: Theme.of(context).textTheme.titleMedium,
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: value / 100,
+                minHeight: 8,
+                backgroundColor: ThemeColors.getCardBackgroundLight(context),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  value >= 70 ? AppColors.safe : value >= 40 ? AppColors.warning : AppColors.danger,
+                ),
+              ),
             ),
           ],
-        ),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: value / 100,
-            minHeight: 8,
-            backgroundColor: AppColors.cardBackgroundLight,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              value >= 70 ? AppColors.safe : value >= 40 ? AppColors.warning : AppColors.danger,
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

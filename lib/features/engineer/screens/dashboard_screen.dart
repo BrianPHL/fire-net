@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/layouts/engineer_scaffold.dart';
 import '../../../shared/widgets/app_section_header.dart';
 import '../../../shared/widgets/status_pill.dart';
@@ -68,23 +71,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppSectionHeader(
-                      title: 'System Overview',
-                      subtitle: 'Engineer telemetry and node health at a glance',
-                      trailing: StatusPill(
-                        label: warningOrDangerNodes == 0
-                            ? 'All Stable'
-                            : '$warningOrDangerNodes Need Attention',
-                        color: warningOrDangerNodes == 0
-                            ? AppColors.safe
-                            : AppColors.warning,
-                        backgroundColor: warningOrDangerNodes == 0
-                            ? AppColors.safeBackground
-                            : AppColors.warningBackground,
-                        icon: warningOrDangerNodes == 0
-                            ? Icons.check_circle
-                            : Icons.priority_high,
-                      ),
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        return AppSectionHeader(
+                          title: 'System Overview',
+                          subtitle: 'Engineer telemetry and node health at a glance',
+                          trailing: StatusPill(
+                            label: warningOrDangerNodes == 0
+                                ? 'All Stable'
+                                : '$warningOrDangerNodes Need Attention',
+                            color: warningOrDangerNodes == 0
+                                ? AppColors.safe
+                                : AppColors.warning,
+                            backgroundColor: warningOrDangerNodes == 0
+                                ? ThemeColors.getSafeBackground(context)
+                                : ThemeColors.getWarningBackground(context),
+                            icon: warningOrDangerNodes == 0
+                                ? Icons.check_circle
+                                : Icons.priority_high,
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 16),
 

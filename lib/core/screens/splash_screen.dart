@@ -135,14 +135,18 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Use theme-aware background color
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: backgroundColor,
       body: Stack(
         children: [
           // Background gradient lines (tech aesthetic)
           Positioned.fill(
             child: CustomPaint(
-              painter: _BackgroundPainter(),
+              painter: _BackgroundPainter(isDark: isDark),
             ),
           ),
 
@@ -198,26 +202,6 @@ class _SplashScreenState extends State<SplashScreen>
               ],
             ),
           ),
-
-          // Bottom accent bar
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 4,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    AppColors.danger,
-                    AppColors.danger.withValues(alpha: 0),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -226,10 +210,14 @@ class _SplashScreenState extends State<SplashScreen>
 
 /// Custom painter for background decorative lines
 class _BackgroundPainter extends CustomPainter {
+  final bool isDark;
+
+  _BackgroundPainter({required this.isDark});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.danger.withValues(alpha: 0.05)
+      ..color = AppColors.danger.withValues(alpha: isDark ? 0.05 : 0.08)
       ..strokeWidth = 1;
 
     // Vertical lines
@@ -252,7 +240,7 @@ class _BackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_BackgroundPainter oldDelegate) => false;
+  bool shouldRepaint(_BackgroundPainter oldDelegate) => oldDelegate.isDark != isDark;
 }
 
 /// Custom painter for animated loading indicator

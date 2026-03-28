@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
 
@@ -24,80 +27,71 @@ class AlertCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              _buildIcon(),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      alert.title,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (showLocation)
-                      Text(
-                        alert.location,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
+          child: Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
+              return Row(
+                children: [
+                  _buildIcon(context),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          alert.title,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                      ),
-                    const SizedBox(height: 4),
-                    Text(
-                      alert.description,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 14,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 4),
+                        if (showLocation)
+                          Text(
+                            alert.location,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          alert.description,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (alert.isResolved) ...[
+                          const SizedBox(height: 8),
+                          _buildResolvedBadge(context),
+                        ],
+                      ],
                     ),
-                    if (alert.isResolved) ...[
-                      const SizedBox(height: 8),
-                      _buildResolvedBadge(),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     Helpers.getRelativeTime(alert.triggeredAt),
-                    style: const TextStyle(
-                      color: AppColors.textTertiary,
-                      fontSize: 12,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 4),
-                  const Icon(
+                  Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
-                    color: AppColors.textTertiary,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                 ],
               ),
-            ],
+              ],
+            );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildIcon() {
+  Widget _buildIcon(BuildContext context) {
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: _getIconBackgroundColor(),
+        color: _getIconBackgroundColor(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(
@@ -108,11 +102,11 @@ class AlertCard extends StatelessWidget {
     );
   }
 
-  Widget _buildResolvedBadge() {
+  Widget _buildResolvedBadge(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.safeBackground,
+        color: ThemeColors.getSafeBackground(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -141,18 +135,18 @@ class AlertCard extends StatelessWidget {
       case 'warning':
         return AppColors.warning;
       default:
-        return AppColors.textSecondary;
+        return AppColors.primary;
     }
   }
 
-  Color _getIconBackgroundColor() {
+  Color _getIconBackgroundColor(BuildContext context) {
     switch (alert.severity) {
       case 'danger':
-        return AppColors.dangerBackground;
+        return ThemeColors.getDangerBackground(context);
       case 'warning':
-        return AppColors.warningBackground;
+        return ThemeColors.getWarningBackground(context);
       default:
-        return AppColors.cardBackgroundLight;
+        return ThemeColors.getCardBackgroundLight(context);
     }
   }
 }

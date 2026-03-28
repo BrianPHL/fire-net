@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
@@ -115,32 +118,44 @@ class _AlertsScreenState extends State<AlertsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const AppSectionHeader(
-                  title: 'Active Alerts',
-                  subtitle: 'Monitor unresolved warning and danger events',
-                  trailing: StatusPill(
-                    label: 'Live Feed',
-                    color: AppColors.warning,
-                    backgroundColor: AppColors.warningBackground,
-                    icon: Icons.notifications_active,
-                  ),
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, _) {
+                    return AppSectionHeader(
+                      title: 'Active Alerts',
+                      subtitle: 'Monitor unresolved warning and danger events',
+                      trailing: StatusPill(
+                        label: 'Live Feed',
+                        color: AppColors.warning,
+                        backgroundColor: ThemeColors.getWarningBackground(context),
+                        icon: Icons.notifications_active,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 14),
                 Wrap(
                   spacing: 10,
                   runSpacing: 10,
                   children: [
-                    StatusPill(
-                      label: '$dangerCount danger',
-                      color: AppColors.danger,
-                      backgroundColor: AppColors.dangerBackground,
-                      icon: Icons.local_fire_department,
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        return StatusPill(
+                          label: '$dangerCount danger',
+                          color: AppColors.danger,
+                          backgroundColor: ThemeColors.getDangerBackground(context),
+                          icon: Icons.local_fire_department,
+                        );
+                      },
                     ),
-                    StatusPill(
-                      label: '$warningCount warning',
-                      color: AppColors.warning,
-                      backgroundColor: AppColors.warningBackground,
-                      icon: Icons.warning_amber,
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        return StatusPill(
+                          label: '$warningCount warning',
+                          color: AppColors.warning,
+                          backgroundColor: ThemeColors.getWarningBackground(context),
+                          icon: Icons.warning_amber,
+                        );
+                      },
                     ),
                   ],
                 ),

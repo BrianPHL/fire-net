@@ -1,9 +1,12 @@
 import 'package:fire_net/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_colors.dart';
+import 'core/theme/theme_provider.dart';
 import 'core/constants/app_constants.dart';
 import 'core/screens/splash_screen.dart';
 import 'routes/app_routes.dart';
@@ -49,6 +52,9 @@ Future<void> main() async {
         rethrow;
       }
     }
+
+    // Initialize theme provider
+    await ThemeProvider().init();
   } catch (error, stackTrace) {
     debugPrint('Startup initialization failed: $error');
     debugPrintStack(stackTrace: stackTrace);
@@ -74,15 +80,36 @@ class FireNetApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppConstants.appName,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      home: startupError == null
-          ? const SplashScreenWrapper()
-          : StartupErrorScreen(errorMessage: startupError!),
-      initialRoute: startupError == null ? null : null,
-      onGenerateRoute: startupError == null ? _onGenerateRoute : null,
+    return ChangeNotifierProvider<ThemeProvider>(
+      create: (_) {
+        // Return the singleton instance which was already initialized in main()
+        return ThemeProvider();
+      },
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          // Set system UI overlay style based on theme
+          final isDark = themeProvider.isDarkMode;
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle(
+              statusBarColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+              statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+              systemNavigationBarColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+              systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+            ),
+          );
+
+          return MaterialApp(
+            title: AppConstants.appName,
+            debugShowCheckedModeBanner: false,
+            theme: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
+            home: startupError == null
+                ? const SplashScreenWrapper()
+                : StartupErrorScreen(errorMessage: startupError!),
+            initialRoute: startupError == null ? null : null,
+            onGenerateRoute: startupError == null ? _onGenerateRoute : null,
+          );
+        },
+      ),
     );
   }
 
@@ -159,7 +186,7 @@ class FireNetApp extends StatelessWidget {
   Route<dynamic> _errorRoute(String message) {
     return MaterialPageRoute(
       builder: (_) => Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.darkBackground,
         appBar: AppBar(title: const Text('Error')),
         body: Center(
           child: Column(
@@ -174,7 +201,7 @@ class FireNetApp extends StatelessWidget {
               Text(
                 message,
                 style: const TextStyle(
-                  color: AppColors.textPrimary,
+                  color: AppColors.darkTextPrimary,
                   fontSize: 18,
                 ),
               ),
@@ -219,7 +246,7 @@ class StartupErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Startup Error')),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -236,7 +263,7 @@ class StartupErrorScreen extends StatelessWidget {
             const Text(
               'App failed to initialize.',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: AppColors.darkTextPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -246,7 +273,7 @@ class StartupErrorScreen extends StatelessWidget {
             Text(
               errorMessage,
               style: const TextStyle(
-                color: AppColors.textSecondary,
+                color: AppColors.darkTextSecondary,
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,

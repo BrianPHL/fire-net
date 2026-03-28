@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../shared/layouts/engineer_scaffold.dart';
 import '../../../shared/widgets/app_section_header.dart';
 import '../../../shared/widgets/status_pill.dart';
@@ -48,15 +51,19 @@ class _SensorManagementScreenState extends State<SensorManagementScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppSectionHeader(
-                  title: 'Network Configuration',
-                  subtitle: 'Inspect sensor nodes and expand for live diagnostics',
-                  trailing: StatusPill(
-                    label: '${nodes.length} Nodes',
-                    color: AppColors.primary,
-                    backgroundColor: AppColors.cardBackgroundLight,
-                    icon: Icons.hub,
-                  ),
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, _) {
+                    return AppSectionHeader(
+                      title: 'Network Configuration',
+                      subtitle: 'Inspect sensor nodes and expand for live diagnostics',
+                      trailing: StatusPill(
+                        label: '${nodes.length} Nodes',
+                        color: AppColors.primary,
+                        backgroundColor: ThemeColors.getCardBackgroundLight(context),
+                        icon: Icons.hub,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 if (nodes.isNotEmpty)
@@ -64,17 +71,25 @@ class _SensorManagementScreenState extends State<SensorManagementScreen> {
                     spacing: 10,
                     runSpacing: 10,
                     children: [
-                      StatusPill(
-                        label: '$dangerCount danger',
-                        color: AppColors.danger,
-                        backgroundColor: AppColors.dangerBackground,
-                        icon: Icons.local_fire_department,
+                      Consumer<ThemeProvider>(
+                        builder: (context, themeProvider, _) {
+                          return StatusPill(
+                            label: '$dangerCount danger',
+                            color: AppColors.danger,
+                            backgroundColor: ThemeColors.getDangerBackground(context),
+                            icon: Icons.local_fire_department,
+                          );
+                        },
                       ),
-                      StatusPill(
-                        label: '$warningCount warning',
-                        color: AppColors.warning,
-                        backgroundColor: AppColors.warningBackground,
-                        icon: Icons.warning_amber,
+                      Consumer<ThemeProvider>(
+                        builder: (context, themeProvider, _) {
+                          return StatusPill(
+                            label: '$warningCount warning',
+                            color: AppColors.warning,
+                            backgroundColor: ThemeColors.getWarningBackground(context),
+                            icon: Icons.warning_amber,
+                          );
+                        },
                       ),
                     ],
                   ),

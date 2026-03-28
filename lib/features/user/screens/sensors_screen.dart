@@ -135,7 +135,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
         child: Text(
           'No sensor data yet. Start your ESP32 sender to stream readings.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+          style: TextStyle(color: AppColors.textTertiary, fontSize: 15),
         ),
       ),
     );

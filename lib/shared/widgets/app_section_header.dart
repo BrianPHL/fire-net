@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
 
 class AppSectionHeader extends StatelessWidget {
   final String title;
@@ -25,7 +24,6 @@ class AppSectionHeader extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
 import '../../../models/chart_data.dart';
 import '../../../models/alert.dart';
+import '../../../shared/widgets/status_pill.dart';
 
 /// Sensor detail screen showing comprehensive sensor readings and trends
 class SensorDetailScreen extends StatelessWidget {
@@ -24,19 +26,16 @@ class SensorDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(sensor.name),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: _getStatusBackgroundColor(),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              _getStatusText(),
-              style: TextStyle(
-                color: _getStatusColor(),
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              child: Builder(
+                builder: (context) => StatusPill(
+                  label: _getStatusText(),
+                  color: _getStatusColor(),
+                  backgroundColor: _getStatusBackgroundColor(context),
+                  icon: _getStatusIcon(),
+                ),
               ),
             ),
           ),
@@ -63,49 +62,51 @@ class SensorDetailScreen extends StatelessWidget {
   }
 
   Widget _buildLocationHeader() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: _getStatusBackgroundColor(),
-                borderRadius: BorderRadius.circular(12),
+    return Builder(
+      builder: (context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: _getStatusBackgroundColor(context),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.location_on,
+                  color: _getStatusColor(),
+                  size: 24,
+                ),
               ),
-              child: Icon(
-                Icons.location_on,
-                color: _getStatusColor(),
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    sensor.location,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sensor.location,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Updated ${Helpers.getRelativeTime(sensor.lastUpdated)}',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
+                    const SizedBox(height: 4),
+                    Text(
+                      'Updated ${Helpers.getRelativeTime(sensor.lastUpdated)}',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -220,25 +221,12 @@ class SensorDetailScreen extends StatelessWidget {
             else
               Align(
                 alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.warningBackground,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.warning.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  child: const Text(
-                    'Sensor Unavailable',
-                    style: TextStyle(
-                      color: AppColors.warning,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
+                child: Builder(
+                  builder: (context) => StatusPill(
+                    label: 'Sensor Unavailable',
+                    color: AppColors.warning,
+                    backgroundColor: ThemeColors.getWarningBackground(context),
+                    icon: Icons.warning_amber,
                   ),
                 ),
               ),
@@ -399,7 +387,7 @@ class SensorDetailScreen extends StatelessWidget {
                     Text(
                       'No recent alerts',
                       style: TextStyle(
-                        color: AppColors.textSecondary,
+                        color: AppColors.textTertiary,
                         fontSize: 14,
                       ),
                     ),
@@ -482,16 +470,16 @@ class SensorDetailScreen extends StatelessWidget {
     }
   }
 
-  Color _getStatusBackgroundColor() {
+  Color _getStatusBackgroundColor(BuildContext context) {
     switch (sensor.status) {
       case 'danger':
-        return AppColors.dangerBackground;
+        return ThemeColors.getDangerBackground(context);
       case 'warning':
-        return AppColors.warningBackground;
+        return ThemeColors.getWarningBackground(context);
       case 'safe':
-        return AppColors.safeBackground;
+        return ThemeColors.getSafeBackground(context);
       default:
-        return AppColors.cardBackgroundLight;
+        return ThemeColors.getCardBackgroundLight(context);
     }
   }
 
@@ -507,7 +495,18 @@ class SensorDetailScreen extends StatelessWidget {
         return 'Offline';
     }
   }
-}
+  IconData _getStatusIcon() {
+    switch (sensor.status) {
+      case 'danger':
+        return Icons.error;
+      case 'warning':
+        return Icons.warning_amber;
+      case 'safe':
+        return Icons.check_circle;
+      default:
+        return Icons.help_outline;
+    }
+  }}
 
 /// Simple chart painter for temperature trend
 class SimpleTrendChartPainter extends CustomPainter {

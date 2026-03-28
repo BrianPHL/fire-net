@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 
 class ThresholdCard extends StatelessWidget {
   final IconData icon;
@@ -122,52 +125,60 @@ class ThresholdInput extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackgroundLight,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: color.withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  value.toStringAsFixed(0),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
+        Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: ThemeColors.getCardBackgroundLight(context),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      value.toStringAsFixed(0),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                  Text(
+                    unit,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: ThemeColors.getTextSecondary(context),
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                unit,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
         const SizedBox(height: 8),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            activeTrackColor: color,
-            inactiveTrackColor: AppColors.cardBackgroundLight,
-            thumbColor: color,
-            overlayColor: color.withValues(alpha: 0.2),
-            trackHeight: 4,
-          ),
-          child: Slider(
-            value: value,
-            min: min,
-            max: max,
-            divisions: (max - min).toInt(),
-            onChanged: onChanged,
-          ),
+        Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: color,
+                inactiveTrackColor: ThemeColors.getCardBackgroundLight(context),
+                thumbColor: color,
+                overlayColor: color.withValues(alpha: 0.2),
+                trackHeight: 4,
+              ),
+              child: Slider(
+                value: value,
+                min: min,
+                max: max,
+                divisions: (max - min).toInt(),
+                onChanged: onChanged,
+              ),
+            );
+          },
         ),
       ],
     );

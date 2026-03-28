@@ -16,7 +16,6 @@ class InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppColors.cardBackgroundLight,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

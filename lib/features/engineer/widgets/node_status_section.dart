@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
 import '../../../models/sensor_node.dart';
 import '../../../routes/app_routes.dart';
+import '../../../shared/widgets/status_pill.dart';
 
 class NodeStatusSection extends StatelessWidget {
   final List<SensorNode> nodes;
@@ -69,36 +71,19 @@ class NodeStatusCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          statusLabel,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                  StatusPill(
+                    label: statusLabel,
+                    color: statusColor,
+                    backgroundColor: statusColor == AppColors.safe
+                        ? ThemeColors.getSafeBackground(context)
+                        : statusColor == AppColors.warning
+                            ? ThemeColors.getWarningBackground(context)
+                            : ThemeColors.getDangerBackground(context),
+                    icon: statusColor == AppColors.safe
+                        ? Icons.check_circle
+                        : statusColor == AppColors.warning
+                            ? Icons.warning_amber
+                            : Icons.error,
                   ),
                   const SizedBox(height: 8),
                   Row(

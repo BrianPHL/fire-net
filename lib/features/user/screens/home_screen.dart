@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
 import '../../../models/alert.dart';
@@ -140,15 +143,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppSectionHeader(
-          title: Helpers.getGreeting(),
-          subtitle: Helpers.formatDateTime(DateTime.now()),
-          trailing: const StatusPill(
-            label: 'Live',
-            color: AppColors.safe,
-            backgroundColor: AppColors.safeBackground,
-            icon: Icons.wifi,
-          ),
+        Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return AppSectionHeader(
+              title: Helpers.getGreeting(),
+              subtitle: Helpers.formatDateTime(DateTime.now()),
+              trailing: StatusPill(
+                label: 'Live',
+                color: AppColors.safe,
+                backgroundColor: ThemeColors.getSafeBackground(context),
+                icon: Icons.wifi,
+              ),
+            );
+          },
         ),
         const SizedBox(height: 8),
         // Text(
@@ -204,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -220,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'Tap to view details',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                           fontSize: 14,
                         ),
                       ),
@@ -336,9 +343,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final statusColor = hasError ? AppColors.danger : AppColors.safe;
-    final statusBackground = hasError
-        ? AppColors.dangerBackground
-        : AppColors.safeBackground;
     final statusLabel = hasError
         ? 'Stream Error'
         : '$activeNodes Nodes Active';
@@ -346,15 +350,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppSectionHeader(
-          title: 'Sensor Network',
-          subtitle: 'Real-time node status and latest telemetry',
-          trailing: StatusPill(
-            label: statusLabel,
-            color: statusColor,
-            backgroundColor: statusBackground,
-            icon: hasError ? Icons.error_outline : Icons.hub,
-          ),
+        Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            final backgroundColor = hasError
+                ? ThemeColors.getDangerBackground(context)
+                : ThemeColors.getSafeBackground(context);
+            return AppSectionHeader(
+              title: 'Sensor Network',
+              subtitle: 'Real-time node status and latest telemetry',
+              trailing: StatusPill(
+                label: statusLabel,
+                color: statusColor,
+                backgroundColor: backgroundColor,
+                icon: hasError ? Icons.error_outline : Icons.hub,
+              ),
+            );
+          },
         ),
         const SizedBox(height: 12),
         if (sensors.isEmpty)

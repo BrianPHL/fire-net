@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
 
@@ -18,22 +21,26 @@ class SensorCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 16),
-              _buildReadings(),
-              const SizedBox(height: 12),
-              _buildFooter(),
-            ],
+          child: Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context),
+                  const SizedBox(height: 16),
+                  _buildReadings(),
+                  const SizedBox(height: 12),
+                  _buildFooter(context),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         // Status indicator
@@ -41,7 +48,7 @@ class SensorCard extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: _getStatusBackgroundColor(),
+            color: _getStatusBackgroundColor(context),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
@@ -63,19 +70,12 @@ class SensorCard extends StatelessWidget {
             children: [
               Text(
                 sensor.name,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 2),
               Text(
                 sensor.location,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
@@ -84,7 +84,7 @@ class SensorCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: _getStatusBackgroundColor(),
+            color: _getStatusBackgroundColor(context),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -193,22 +193,20 @@ class SensorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.access_time, size: 14, color: AppColors.textTertiary),
+        Icon(Icons.access_time, size: 14, color: Theme.of(context).textTheme.bodySmall?.color),
         const SizedBox(width: 4),
         Text(
           'Updated ${Helpers.getRelativeTime(sensor.lastUpdated)}',
-          style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+          style: Theme.of(context).textTheme.bodySmall,
         ),
         const Spacer(),
-        const Text(
+        Text(
           'View Details',
-          style: TextStyle(
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: AppColors.primary,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(width: 4),
@@ -226,20 +224,20 @@ class SensorCard extends StatelessWidget {
       case 'safe':
         return AppColors.safe;
       default:
-        return AppColors.textSecondary;
+        return AppColors.primary;
     }
   }
 
-  Color _getStatusBackgroundColor() {
+  Color _getStatusBackgroundColor(BuildContext context) {
     switch (sensor.status) {
       case 'danger':
-        return AppColors.dangerBackground;
+        return ThemeColors.getDangerBackground(context);
       case 'warning':
-        return AppColors.warningBackground;
+        return ThemeColors.getWarningBackground(context);
       case 'safe':
-        return AppColors.safeBackground;
+        return ThemeColors.getSafeBackground(context);
       default:
-        return AppColors.cardBackgroundLight;
+        return ThemeColors.getCardBackgroundLight(context);
     }
   }
 

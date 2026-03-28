@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../core/theme/theme_provider.dart';
 
 /// App scaffold layout with consistent structure
 class AppScaffold extends StatelessWidget {
@@ -28,37 +29,53 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appBarActions = <Widget>[
-      ...?actions,
-      if (onLogout != null)
-        IconButton(
-          onPressed: onLogout,
-          tooltip: 'Logout',
-          icon: const Icon(Icons.logout),
-        ),
-    ];
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        final appBarActions = <Widget>[
+          ...?actions,
+          IconButton(
+            onPressed: () => themeProvider.toggleTheme(),
+            tooltip: themeProvider.isDarkMode ? 'Light Mode' : 'Dark Mode',
+            icon: Icon(
+              themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            ),
+          ),
+          if (onLogout != null)
+            IconButton(
+              onPressed: onLogout,
+              tooltip: 'Logout',
+              icon: const Icon(Icons.logout),
+            ),
+        ];
 
-    return Scaffold(
-      appBar: title != null || onLogout != null
-          ? AppBar(
-              title: title != null ? Text(title!) : null,
-              automaticallyImplyLeading: showBackButton,
-              actions: appBarActions,
-              bottom: bottom,
-            )
-          : null,
-      body: body,
-      floatingActionButton: floatingActionButton,
-      bottomNavigationBar: currentIndex != null && onNavigationChanged != null
-          ? _buildBottomNavigationBar()
-          : null,
+        return Scaffold(
+          appBar: title != null || onLogout != null
+              ? AppBar(
+                  title: title != null ? Text(title!) : null,
+                  automaticallyImplyLeading: showBackButton,
+                  actions: appBarActions,
+                  bottom: bottom,
+                )
+              : null,
+          body: body,
+          floatingActionButton: floatingActionButton,
+          bottomNavigationBar: currentIndex != null && onNavigationChanged != null
+              ? _buildBottomNavigationBar(context)
+              : null,
+        );
+      },
     );
   }
 
-  Widget _buildBottomNavigationBar() {
+  Widget _buildBottomNavigationBar(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.borderColor, width: 1)),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).dividerColor,
+            width: 1,
+          ),
+        ),
       ),
       child: BottomNavigationBar(
         currentIndex: currentIndex!,
@@ -84,3 +101,4 @@ class AppScaffold extends StatelessWidget {
     );
   }
 }
+

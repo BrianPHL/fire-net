@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../models/alert.dart';
 
 class ActiveAlertsPanel extends StatelessWidget {
@@ -36,20 +39,28 @@ class ActiveAlertsPanel extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: AlertCountCard(
-                    count: criticalCount,
-                    label: 'Critical',
-                    color: AppColors.danger,
-                    backgroundColor: AppColors.dangerBackground,
+                  child: Consumer<ThemeProvider>(
+                    builder: (context, themeProvider, _) {
+                      return AlertCountCard(
+                        count: criticalCount,
+                        label: 'Critical',
+                        color: AppColors.danger,
+                        backgroundColor: ThemeColors.getDangerBackground(context),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: AlertCountCard(
-                    count: warningCount,
-                    label: 'Warnings',
-                    color: AppColors.warning,
-                    backgroundColor: AppColors.warningBackground,
+                  child: Consumer<ThemeProvider>(
+                    builder: (context, themeProvider, _) {
+                      return AlertCountCard(
+                        count: warningCount,
+                        label: 'Warnings',
+                        color: AppColors.warning,
+                        backgroundColor: ThemeColors.getWarningBackground(context),
+                      );
+                    },
                   ),
                 ),
               ],
