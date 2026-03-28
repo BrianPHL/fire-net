@@ -184,7 +184,7 @@ class ThemeColors {
   static Color getDiagnosticTealBright(BuildContext context) {
     return getColor(
       context,
-      darkVariant: AppColors.darkDiagnosticTealBright,
+      darkVariant: AppColors.darkPrimary,
       lightVariant: AppColors.lightDiagnosticTealBright,
     );
   }
@@ -192,7 +192,7 @@ class ThemeColors {
   static Color getDiagnosticTealAccent(BuildContext context) {
     return getColor(
       context,
-      darkVariant: AppColors.darkDiagnosticTealAccent,
+      darkVariant: AppColors.darkPrimaryDark,
       lightVariant: AppColors.lightDiagnosticTealAccent,
     );
   }
@@ -211,6 +211,90 @@ class ThemeColors {
       context,
       darkVariant: AppColors.darkActivityDark,
       lightVariant: AppColors.lightActivityDark,
+    );
+  }
+
+  // ========== TEXT COLORS ==========
+  static Color getTextPrimary(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkTextPrimary,
+      lightVariant: AppColors.lightTextPrimary,
+    );
+  }
+
+  // ========== SEMANTIC STATUS COLORS ==========
+  static Color getDanger(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkDanger,
+      lightVariant: AppColors.lightDanger,
+    );
+  }
+
+  static Color getWarning(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkWarning,
+      lightVariant: AppColors.lightWarning,
+    );
+  }
+
+  static Color getSafe(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkSafe,
+      lightVariant: AppColors.lightSafe,
+    );
+  }
+
+  static Color getPrimary(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkPrimary,
+      lightVariant: AppColors.lightPrimary,
+    );
+  }
+
+  // ========== SENSOR INDICATOR COLORS ==========
+  static Color getTemperatureColor(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkTemperatureColor,
+      lightVariant: AppColors.lightTemperatureColor,
+    );
+  }
+
+  static Color getSmokeColor(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkSmokeColor,
+      lightVariant: AppColors.lightSmokeColor,
+    );
+  }
+
+  static Color getGasColor(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkGasColor,
+      lightVariant: AppColors.lightGasColor,
+    );
+  }
+
+  // ========== CHART COLORS ==========
+  static Color getChartLine(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkChartLine,
+      lightVariant: AppColors.lightChartLine,
+    );
+  }
+
+  static Color getChartGrid(BuildContext context) {
+    return getColor(
+      context,
+      darkVariant: AppColors.darkChartGrid,
+      lightVariant: AppColors.lightChartGrid,
     );
   }
 }
