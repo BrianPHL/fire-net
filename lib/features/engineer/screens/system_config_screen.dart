@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../shared/layouts/engineer_scaffold.dart';
-import '../../../core/theme/app_colors.dart';
 import '../widgets/threshold_card.dart';
 import '../../../core/theme/theme_colors.dart';
 
@@ -152,8 +151,8 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.background,
+                  backgroundColor: ThemeColors.getPrimary(context),
+                  foregroundColor: ThemeColors.getColor(context, darkVariant: Colors.black, lightVariant: Colors.white),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

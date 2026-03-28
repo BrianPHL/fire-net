@@ -58,8 +58,8 @@ class _SensorManagementScreenState extends State<SensorManagementScreen> {
                       subtitle: 'Inspect sensor nodes and expand for live diagnostics',
                       trailing: StatusPill(
                         label: '${nodes.length} Nodes',
-                        color: AppColors.primary,
-                        backgroundColor: ThemeColors.getCardBackgroundLight(context),
+                        color: ThemeColors.getPrimary(context),
+                        backgroundColor: ThemeColors.getSafeBackground(context),
                         icon: Icons.hub,
                       ),
                     );

@@ -1,3 +1,4 @@
+import 'package:fire_net/core/theme/theme_colors.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 
@@ -27,8 +28,8 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? AppColors.primary : AppColors.cardBackground,
-          foregroundColor: isPrimary ? AppColors.background : AppColors.textPrimary,
+          backgroundColor: isPrimary ? ThemeColors.getPrimary(context): ThemeColors.getCardBackground(context),
+          foregroundColor: isPrimary ? ThemeColors.getCardBackground(context) : ThemeColors.getColor(context, darkVariant: Colors.white, lightVariant: Colors.black),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

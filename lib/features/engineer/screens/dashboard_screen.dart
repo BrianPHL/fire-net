@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/layouts/engineer_scaffold.dart';
@@ -82,7 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 : '$warningOrDangerNodes Need Attention',
                             color: warningOrDangerNodes == 0
                                 ? ThemeColors.getSafe(context)
-                                : AppColors.warning,
+                                : ThemeColors.getWarning(context),
                             backgroundColor: warningOrDangerNodes == 0
                                 ? ThemeColors.getSafeBackground(context)
                                 : ThemeColors.getWarningBackground(context),

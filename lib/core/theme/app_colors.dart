@@ -55,7 +55,7 @@ class AppColors {
   static const Color primary = lightPrimary;
   static const Color primaryDark = lightPrimaryDark;
   static const Color danger = lightDanger;
-  static const Color warning = lightWarning;
+  static const Color warning = Color.fromARGB(255, 255, 183, 0);
   static const Color safe = lightSafe;
   static const Color temperatureColor = lightTemperatureColor;
   static const Color smokeColor = lightSmokeColor;

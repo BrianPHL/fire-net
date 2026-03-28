@@ -1,5 +1,5 @@
+import 'package:fire_net/core/theme/theme_colors.dart';
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
 
 class SystemStatCard extends StatelessWidget {
   final IconData icon;
@@ -22,7 +22,7 @@ class SystemStatCard extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: AppColors.primary,
+              color: ThemeColors.getPrimary(context),
               size: 32,
             ),
             const SizedBox(height: 12),

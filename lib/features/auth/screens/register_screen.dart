@@ -5,6 +5,7 @@ import '../../../core/utils/helpers.dart';
 import '../../../routes/app_routes.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/firenet_logo.dart';
+import '../../../core/theme/theme_colors.dart';
 import '../auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -375,10 +376,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text(
+          child: Text(
             'Sign In',
             style: TextStyle(
-              color: AppColors.primary,
+              color: ThemeColors.getPrimary(context),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
