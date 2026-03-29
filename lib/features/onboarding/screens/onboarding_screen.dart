@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../routes/app_routes.dart';
+import '../../../services/onboarding_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -80,8 +81,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _pageController.jumpToPage(_pages.length - 1);
   }
 
-  void _getStarted() {
-    Navigator.pushReplacementNamed(context, AppRoutes.login);
+  Future<void> _getStarted() async {
+    // Mark onboarding as completed
+    await OnboardingService.markOnboardingComplete();
+    // Navigate to register screen (prioritize register over login)
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.register);
+    }
   }
 
   @override

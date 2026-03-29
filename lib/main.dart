@@ -25,6 +25,7 @@ import 'features/engineer/screens/system_config_screen.dart';
 import 'features/engineer/screens/system_diagnostics_screen.dart';
 import 'models/alert.dart';
 import 'models/sensor_node.dart';
+import 'services/onboarding_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -224,12 +225,26 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
   @override
   void initState() {
     super.initState();
-    // Navigate to onboarding screen after splash screen animation completes
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed(AppRoutes.onboarding);
-      }
-    });
+    _navigateAfterSplash();
+  }
+
+  Future<void> _navigateAfterSplash() async {
+    // Wait for splash screen animation to complete
+    await Future.delayed(const Duration(seconds: 3));
+    
+    if (!mounted) return;
+
+    // Check if onboarding has been completed
+    final onboardingComplete = await OnboardingService.isOnboardingComplete();
+    
+    if (!mounted) return;
+    
+    // Navigate based on onboarding status
+    final nextRoute = onboardingComplete ? AppRoutes.login : AppRoutes.onboarding;
+    
+    if (mounted) {
+      Navigator.of(context).pushReplacementNamed(nextRoute);
+    }
   }
 
   @override
