@@ -95,6 +95,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      title: 'Active Alerts',
       currentIndex: _currentIndex,
       onNavigationChanged: _onNavigationChanged,
       onLogout: _handleLogout,

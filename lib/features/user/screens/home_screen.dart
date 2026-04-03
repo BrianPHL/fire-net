@@ -97,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      title: 'User Panel',
       currentIndex: _currentIndex,
       onNavigationChanged: _onNavigationChanged,
       onLogout: _handleLogout,

@@ -123,6 +123,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      title: 'Alert History',
       currentIndex: _currentIndex,
       onNavigationChanged: _onNavigationChanged,
       onLogout: _handleLogout,
