@@ -41,6 +41,8 @@ dependencies:
   firebase_auth: ^6.1.0
   cloud_firestore: ^6.0.3
   firebase_database: ^12.0.3
+  firebase_messaging: ^16.0.2
+  flutter_local_notifications: ^18.0.1
   
   # Environment variables (like dotenv in Node.js)
   flutter_dotenv: ^6.0.0
