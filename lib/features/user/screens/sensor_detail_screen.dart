@@ -3,24 +3,19 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
-import '../../../models/chart_data.dart';
 import '../../../models/alert.dart';
+import '../../../services/alert_service.dart';
 import '../../../shared/widgets/status_pill.dart';
 
 /// Sensor detail screen showing comprehensive sensor readings and trends
 class SensorDetailScreen extends StatelessWidget {
   final SensorNode sensor;
+  final AlertService _alertService = AlertService();
 
-  const SensorDetailScreen({super.key, required this.sensor});
+  SensorDetailScreen({super.key, required this.sensor});
 
   @override
   Widget build(BuildContext context) {
-    // Mock alert related to this sensor
-    final relatedAlert = Alert.getMockAlerts().firstWhere(
-      (a) => a.nodeId == sensor.id && a.isActive,
-      orElse: () => Alert.getMockAlerts().first,
-    );
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -41,22 +36,40 @@ class SensorDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildLocationHeader(),
-            const SizedBox(height: 24),
-            _buildReadingsGrid(context),
-            const SizedBox(height: 24),
-            _buildChart(context),
-            const SizedBox(height: 24),
-            if (sensor.status == 'danger') _buildAlertExplanation(context, relatedAlert),
-            const SizedBox(height: 16),
-            _buildRecentAlerts(context),
-          ],
-        ),
+      body: StreamBuilder<List<Alert>>(
+        stream: _alertService.watchAlerts(),
+        builder: (context, snapshot) {
+          final relatedAlerts = (snapshot.data ?? <Alert>[])
+              .where((alert) => alert.nodeId == sensor.id)
+              .toList();
+
+          Alert? activeDangerAlert;
+          for (final alert in relatedAlerts) {
+            if (alert.isActive && alert.severity == 'danger') {
+              activeDangerAlert = alert;
+              break;
+            }
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildLocationHeader(),
+                const SizedBox(height: 24),
+                _buildReadingsGrid(context),
+                const SizedBox(height: 24),
+                _buildTrendUnavailable(context),
+                const SizedBox(height: 24),
+                if (activeDangerAlert != null)
+                  _buildAlertExplanation(context, activeDangerAlert),
+                const SizedBox(height: 16),
+                _buildRecentAlerts(context, relatedAlerts),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -241,9 +254,7 @@ class SensorDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChart(BuildContext context) {
-    final chartData = ChartDataPoint.getMockTemperatureTrend();
-
+  Widget _buildTrendUnavailable(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -265,55 +276,16 @@ class SensorDetailScreen extends StatelessWidget {
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: CustomPaint(
-                painter: SimpleTrendChartPainter(
-                  chartData,
-                  chartLineColor: ThemeColors.getChartLine(context),
-                  gridColor: ThemeColors.getChartGrid(context),
-                ),
-                child: Container(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '00:00',
+              child: Center(
+                child: Text(
+                  'Historical trend data unavailable',
                   style: TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 12,
+                    color: ThemeColors.getTextSecondary(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                Text(
-                  '06:00',
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  '12:00',
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  '18:00',
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  '23:00',
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
@@ -360,12 +332,8 @@ class SensorDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentAlerts(BuildContext context) {
-    // Mock data - in real app, fetch related alerts
-    final alerts = Alert.getMockAlerts()
-        .where((a) => a.nodeId == sensor.id)
-        .take(3)
-        .toList();
+  Widget _buildRecentAlerts(BuildContext context, List<Alert> relatedAlerts) {
+    final alerts = relatedAlerts.take(3).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -514,63 +482,5 @@ class SensorDetailScreen extends StatelessWidget {
       default:
         return Icons.help_outline;
     }
-  }}
-
-/// Simple chart painter for temperature trend
-class SimpleTrendChartPainter extends CustomPainter {
-  final List<ChartDataPoint> data;
-  final Color chartLineColor;
-  final Color gridColor;
-
-  SimpleTrendChartPainter(
-    this.data, {
-    required this.chartLineColor,
-    required this.gridColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (data.isEmpty) return;
-
-    final paint = Paint()
-      ..color = chartLineColor
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    final gridPaint = Paint()
-      ..color = gridColor
-      ..strokeWidth = 1;
-
-    // Draw grid lines
-    for (int i = 0; i <= 4; i++) {
-      final y = size.height * i / 4;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-
-    // Find min and max values
-    final values = data.map((d) => d.value).toList();
-    final minValue = values.reduce((a, b) => a < b ? a : b);
-    final maxValue = values.reduce((a, b) => a > b ? a : b);
-    final range = maxValue - minValue;
-
-    // Draw line chart
-    final path = Path();
-    for (int i = 0; i < data.length; i++) {
-      final x = size.width * i / (data.length - 1);
-      final normalizedValue = (data[i].value - minValue) / range;
-      final y = size.height - (normalizedValue * size.height * 0.9);
-
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-
-    canvas.drawPath(path, paint);
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

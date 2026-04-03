@@ -124,17 +124,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               const SizedBox(width: 16),
                               Expanded(
                                 child: SystemStatCard(
-                                  icon: Icons.battery_charging_full,
-                                  value: _calculateAvgBattery(nodes),
-                                  label: 'Avg Battery',
+                                  icon: Icons.battery_unknown,
+                                  value: 'N/A',
+                                  label: 'Battery Telemetry',
                                 ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: SystemStatCard(
                                   icon: Icons.signal_cellular_alt,
-                                  value: _calculateAvgSignal(nodes),
-                                  label: 'Avg Signal',
+                                  value: 'N/A',
+                                  label: 'Signal Telemetry',
                                 ),
                               ),
                             ],
@@ -152,17 +152,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: SystemStatCard(
-                                  icon: Icons.battery_charging_full,
-                                  value: _calculateAvgBattery(nodes),
-                                  label: 'Avg Battery',
+                                  icon: Icons.battery_unknown,
+                                  value: 'N/A',
+                                  label: 'Battery Telemetry',
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: SystemStatCard(
                                   icon: Icons.signal_cellular_alt,
-                                  value: _calculateAvgSignal(nodes),
-                                  label: 'Avg Signal',
+                                  value: 'N/A',
+                                  label: 'Signal Telemetry',
                                 ),
                               ),
                             ],
@@ -187,13 +187,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  String _calculateAvgBattery(List<SensorNode> nodes) {
-    // Mock calculation lang
-    return '68%';
-  }
-
-  String _calculateAvgSignal(List<SensorNode> nodes) {
-    // Mock calculation lang
-    return '83%';
-  }
 }

@@ -12,9 +12,6 @@ class NodeHealthCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mock health data
-    final batteryLevel = _getBatteryLevel(node.id);
-    final signalLevel = _getSignalLevel(node.id);
     final lastCheckIn = _getLastCheckIn(node.lastUpdated);
 
     return Card(
@@ -56,46 +53,27 @@ class NodeHealthCard extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Battery indicator
+            // Battery indicator (telemetry not currently provided by node payload)
             Row(
               children: [
                 Icon(
-                  Icons.battery_charging_full,
+                  Icons.battery_unknown,
                   size: 20,
                   color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Row(
-                    children: [
-                      // Battery bars
-                      ...List.generate(5, (index) {
-                        final isActive = index < (batteryLevel / 20).floor();
-                        return Container(
-                          width: 12,
-                          height: 20,
-                          margin: const EdgeInsets.only(right: 4),
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? ThemeColors.getSafe(context)
-                                : ThemeColors.getCardBackgroundLight(context),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        );
-                      }),
-                    ],
+                  child: Text(
+                    'Battery telemetry unavailable',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                ),
-                Text(
-                  '$batteryLevel %',
-                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),
 
             const SizedBox(height: 12),
 
-            // Signal indicator
+            // Signal indicator (telemetry not currently provided by node payload)
             Row(
               children: [
                 Icon(
@@ -105,30 +83,10 @@ class NodeHealthCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Row(
-                    children: [
-                      // Signal bars
-                      ...List.generate(5, (index) {
-                        final isActive = index < (signalLevel / 20).floor();
-                        final height = 12.0 + (index * 4.0);
-                        return Container(
-                          width: 8,
-                          height: height,
-                          margin: const EdgeInsets.only(right: 4),
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? ThemeColors.getSafe(context)
-                                : ThemeColors.getCardBackgroundLight(context),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        );
-                      }),
-                    ],
+                  child: Text(
+                    'Signal telemetry unavailable',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                ),
-                Text(
-                  '$signalLevel %',
-                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),
@@ -146,34 +104,6 @@ class NodeHealthCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  int _getBatteryLevel(String nodeId) {
-    // Mock data based on node ID
-    switch (nodeId) {
-      case '1':
-        return 87;
-      case '2':
-        return 62;
-      case '3':
-        return 54;
-      default:
-        return 75;
-    }
-  }
-
-  int _getSignalLevel(String nodeId) {
-    // Mock data based on node ID
-    switch (nodeId) {
-      case '1':
-        return 92;
-      case '2':
-        return 75;
-      case '3':
-        return 82;
-      default:
-        return 80;
-    }
   }
 
   String _getLastCheckIn(DateTime dateTime) {

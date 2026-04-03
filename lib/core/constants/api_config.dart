@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ApiConfig {
   ApiConfig._();
 
-  // Base URL for backend requests. Empty string means local/mock mode.
+  // Base URL for backend requests. Empty string means relative/local mode.
   static String get baseUrl =>
       (dotenv.env['API_BASE_URL'] ?? '').trim();
 

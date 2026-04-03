@@ -7,6 +7,7 @@ import '../../../core/utils/helpers.dart';
 import '../../../models/sensor_node.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
+import '../../../services/alert_service.dart';
 import '../../../shared/layouts/app_scaffold.dart';
 import '../../../shared/widgets/app_section_header.dart';
 import '../../../shared/widgets/status_pill.dart';
@@ -27,9 +28,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final _authService = AuthService();
   final _userService = UserService();
+  final _alertService = AlertService();
 
   List<SensorNode> _lastKnownSensors = const <SensorNode>[];
-  final List<Alert> _alerts = Alert.getMockAlerts();
+  List<Alert> _lastKnownAlerts = const <Alert>[];
 
   void _onNavigationChanged(int index) {
     setState(() => _currentIndex = index);
@@ -110,29 +112,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
           final sensors = snapshot.data ?? _lastKnownSensors;
 
-          return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 24),
-                  _buildEmergencyBanner(),
-                  const SizedBox(height: 24),
-                  _buildStatusCards(sensors),
-                  const SizedBox(height: 24),
-                  _buildRealtimeBanner(),
-                  const SizedBox(height: 16),
-                  _buildSensorNetwork(
-                    sensors,
-                    hasError: snapshot.hasError,
-                    isWaiting:
-                        snapshot.connectionState == ConnectionState.waiting,
+          return StreamBuilder<List<Alert>>(
+            stream: _alertService.watchAlerts(),
+            builder: (context, alertSnapshot) {
+              if (alertSnapshot.hasData) {
+                _lastKnownAlerts = alertSnapshot.data!;
+              }
+
+              final alerts = alertSnapshot.data ?? _lastKnownAlerts;
+
+              return SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                      _buildEmergencyBanner(alerts),
+                      const SizedBox(height: 24),
+                      _buildStatusCards(sensors, alerts),
+                      const SizedBox(height: 24),
+                      _buildRealtimeBanner(),
+                      const SizedBox(height: 16),
+                      _buildSensorNetwork(
+                        sensors,
+                        hasError: snapshot.hasError,
+                        isWaiting:
+                            snapshot.connectionState == ConnectionState.waiting,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),
@@ -166,15 +179,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmergencyBanner() {
-    final activeEmergency = _alerts.firstWhere(
-      (alert) => alert.isActive && alert.severity == 'danger',
-      orElse: () => _alerts.first,
-    );
+  Widget _buildEmergencyBanner(List<Alert> alerts) {
+    final emergencies = alerts
+        .where((alert) => alert.isActive && alert.severity == 'danger')
+        .toList();
 
-    if (activeEmergency.severity != 'danger') {
+    if (emergencies.isEmpty) {
       return const SizedBox.shrink();
     }
+
+    final activeEmergency = emergencies.first;
 
     return Builder(
       builder: (context) => Container(
@@ -217,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '1 Active Emergency',
+                        '${emergencies.length} Active Emergency${emergencies.length > 1 ? 'ies' : ''}',
                         style: TextStyle(
                           color: ThemeColors.getDanger(context),
                           fontSize: 16,
@@ -249,8 +263,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatusCards(List<SensorNode> sensors) {
-    final activeAlerts = _alerts.where((a) => a.isActive).length;
+  Widget _buildStatusCards(List<SensorNode> sensors, List<Alert> alerts) {
+    final activeAlerts = alerts.where((a) => a.isActive).length;
     final dangerNodes = sensors.where((s) => s.status == 'danger').length;
 
     return Row(

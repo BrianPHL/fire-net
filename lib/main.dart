@@ -165,11 +165,7 @@ class FireNetApp extends StatelessWidget {
             builder: (_) => SensorDetailScreen(sensor: sensor),
           );
         }
-        // Fallback to mock data if no sensor passed
-        return MaterialPageRoute(
-          builder: (_) =>
-              SensorDetailScreen(sensor: SensorNode.getMockNodes().first),
-        );
+        return _errorRoute('Sensor not found');
 
       // Engineer routes
       case AppRoutes.engineerDashboard:

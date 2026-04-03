@@ -66,46 +66,6 @@ class SensorNode {
     );
   }
 
-  /// Mock data for UI development
-  static List<SensorNode> getMockNodes() {
-    final now = DateTime.now();
-    return [
-      SensorNode(
-        id: '1',
-        name: 'Bedroom Sensor',
-        location: 'Bedroom',
-        status: 'danger',
-        temperature: 52.3,
-        humidity: 71.0,
-        smoke: 86.0,
-        gas: 95.0,
-        lastUpdated: now,
-      ),
-      SensorNode(
-        id: '2',
-        name: 'Garage Sensor',
-        location: 'Garage',
-        status: 'warning',
-        temperature: 28.2,
-        humidity: 63.0,
-        smoke: 62.0,
-        gas: 180.0,
-        lastUpdated: now.subtract(const Duration(seconds: 30)),
-      ),
-      SensorNode(
-        id: '3',
-        name: 'Kitchen Sensor',
-        location: 'Kitchen',
-        status: 'safe',
-        temperature: 24.5,
-        humidity: 49.0,
-        smoke: 48.0,
-        gas: 45.0,
-        lastUpdated: now.subtract(const Duration(minutes: 2)),
-      ),
-    ];
-  }
-
   SensorNode copyWith({
     String? id,
     String? name,
