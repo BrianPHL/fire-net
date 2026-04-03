@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDocPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function isEngineerOrAdmin() {
+      return isSignedIn()
+        && exists(userDocPath())
+        && (get(userDocPath()).data.role in ['engineer', 'admin']);
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function validUserProfileShape() {
+      return request.resource.data.keys().hasOnly([
+        'uid',
+        'name',
+        'email',
+        'role',
+        'createdAt',
+        'updatedAt'
+      ]);
+    }
+
+    function userCanAcknowledgeAlert() {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly([
+        'acknowledged',
+        'acknowledgedAt',
+        'updatedAt'
+      ])
+      && request.resource.data.acknowledged == true;
+    }
+
+    // users/{uid}
+    // - Owners can read/update their own profile with restricted fields.
+    // - Engineers/Admins have full control.
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isEngineerOrAdmin();
+
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role in ['user', 'engineer']
+        && validUserProfileShape();
+
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.createdAt == resource.data.createdAt
+        && validUserProfileShape();
+
+      allow delete: if isEngineerOrAdmin();
+
+      allow read, write: if isEngineerOrAdmin();
+    }
+
+    // alerts/{alertId}
+    // - Signed-in users can read and acknowledge alerts.
+    // - Engineers/Admins have full control.
+    match /alerts/{alertId} {
+      allow read: if isSignedIn();
+
+      allow create: if isEngineerOrAdmin() || (
+        isSignedIn()
+        && request.resource.data.createdBy == request.auth.uid
+      );
+
+      allow update: if isEngineerOrAdmin() || (
+        isSignedIn() && userCanAcknowledgeAlert()
+      );
+
+      allow delete: if isEngineerOrAdmin();
+    }
+
+    // thresholds/{docId}
+    // - Thresholds are readable so the config screen can load reliably.
+    // - Engineers/Admins can manage thresholds.
+    match /thresholds/{docId} {
+      allow read: if true;
+      allow write: if isEngineerOrAdmin();
+    }
+
+    // Optional user-scoped app data.
+    // - Users only access their own documents.
+    // - Engineers/Admins have full control.
+    match /user_data/{userId} {
+      allow read, create, update: if isOwner(userId) || isEngineerOrAdmin();
+      allow delete: if isEngineerOrAdmin();
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
