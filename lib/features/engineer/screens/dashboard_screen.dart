@@ -8,6 +8,7 @@ import '../../../shared/widgets/status_pill.dart';
 import '../../../models/sensor_node.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
+import '../../../services/alert_service.dart';
 import '../engineer_service.dart';
 import '../widgets/system_stat_card.dart';
 import '../widgets/active_alerts_panel.dart';
@@ -22,12 +23,10 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   static final EngineerService _engineerService = EngineerService();
+  static final AlertService _alertService = AlertService();
 
   @override
   Widget build(BuildContext context) {
-    final alerts = Alert.getMockAlerts();
-    final activeAlerts = alerts.where((a) => a.isActive).toList();
-
     return EngineerScaffold(
       title: 'Engineer Panel',
       currentIndex: 0,
@@ -62,107 +61,124 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               final nodes = snapshot.data ?? <SensorNode>[];
               final warningOrDangerNodes = nodes
-                  .where((node) => node.status == 'warning' || node.status == 'danger')
+                  .where(
+                    (node) =>
+                        node.status == Alert.severityWarning ||
+                        node.status == Alert.severityDanger,
+                  )
                   .length;
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Consumer<ThemeProvider>(
-                      builder: (context, themeProvider, _) {
-                        return AppSectionHeader(
-                          title: 'System Overview',
-                          subtitle: 'Engineer telemetry and node health at a glance',
-                          trailing: StatusPill(
-                            label: warningOrDangerNodes == 0
-                                ? 'All Stable'
-                                : '$warningOrDangerNodes Need Attention',
-                            color: warningOrDangerNodes == 0
-                                ? ThemeColors.getSafe(context)
-                                : ThemeColors.getWarning(context),
-                            backgroundColor: warningOrDangerNodes == 0
-                                ? ThemeColors.getSafeBackground(context)
-                                : ThemeColors.getWarningBackground(context),
-                            icon: warningOrDangerNodes == 0
-                                ? Icons.check_circle
-                                : Icons.priority_high,
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // System stats cards
-                    if (isWideScreen)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SystemStatCard(
-                              icon: Icons.router,
-                              value: '${nodes.length}/${nodes.length}',
-                              label: 'Nodes Online',
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: SystemStatCard(
-                              icon: Icons.battery_charging_full,
-                              value: _calculateAvgBattery(nodes),
-                              label: 'Avg Battery',
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: SystemStatCard(
-                              icon: Icons.signal_cellular_alt,
-                              value: _calculateAvgSignal(nodes),
-                              label: 'Avg Signal',
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SystemStatCard(
-                              icon: Icons.router,
-                              value: '${nodes.length}/${nodes.length}',
-                              label: 'Nodes Online',
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: SystemStatCard(
-                              icon: Icons.battery_charging_full,
-                              value: _calculateAvgBattery(nodes),
-                              label: 'Avg Battery',
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: SystemStatCard(
-                              icon: Icons.signal_cellular_alt,
-                              value: _calculateAvgSignal(nodes),
-                              label: 'Avg Signal',
-                            ),
-                          ),
-                        ],
+              return StreamBuilder<List<Alert>>(
+                stream: _alertService.watchAlerts(status: Alert.statusActive),
+                builder: (context, alertSnapshot) {
+                  if (alertSnapshot.hasError) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text('Failed to load live alerts.'),
                       ),
+                    );
+                  }
 
-                    const SizedBox(height: 24),
+                  final activeAlerts = alertSnapshot.data ?? <Alert>[];
 
-                    // Active System Alerts
-                    ActiveAlertsPanel(alerts: activeAlerts),
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Consumer<ThemeProvider>(
+                          builder: (context, themeProvider, _) {
+                            return AppSectionHeader(
+                              title: 'System Overview',
+                              subtitle: 'Engineer telemetry and node health at a glance',
+                              trailing: StatusPill(
+                                label: warningOrDangerNodes == 0
+                                    ? 'All Stable'
+                                    : '$warningOrDangerNodes Need Attention',
+                                color: warningOrDangerNodes == 0
+                                    ? ThemeColors.getSafe(context)
+                                    : ThemeColors.getWarning(context),
+                                backgroundColor: warningOrDangerNodes == 0
+                                    ? ThemeColors.getSafeBackground(context)
+                                    : ThemeColors.getWarningBackground(context),
+                                icon: warningOrDangerNodes == 0
+                                    ? Icons.check_circle
+                                    : Icons.priority_high,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
 
-                    const SizedBox(height: 24),
+                        if (isWideScreen)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SystemStatCard(
+                                  icon: Icons.router,
+                                  value: '${nodes.length}/${nodes.length}',
+                                  label: 'Nodes Online',
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: SystemStatCard(
+                                  icon: Icons.battery_charging_full,
+                                  value: _calculateAvgBattery(nodes),
+                                  label: 'Avg Battery',
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: SystemStatCard(
+                                  icon: Icons.signal_cellular_alt,
+                                  value: _calculateAvgSignal(nodes),
+                                  label: 'Avg Signal',
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SystemStatCard(
+                                  icon: Icons.router,
+                                  value: '${nodes.length}/${nodes.length}',
+                                  label: 'Nodes Online',
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: SystemStatCard(
+                                  icon: Icons.battery_charging_full,
+                                  value: _calculateAvgBattery(nodes),
+                                  label: 'Avg Battery',
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: SystemStatCard(
+                                  icon: Icons.signal_cellular_alt,
+                                  value: _calculateAvgSignal(nodes),
+                                  label: 'Avg Signal',
+                                ),
+                              ),
+                            ],
+                          ),
 
-                    // Node Status
-                    NodeStatusSection(nodes: nodes),
-                  ],
-                ),
+                        const SizedBox(height: 24),
+
+                        ActiveAlertsPanel(alerts: activeAlerts),
+
+                        const SizedBox(height: 24),
+
+                        NodeStatusSection(nodes: nodes),
+                      ],
+                    ),
+                  );
+                },
               );
             },
           );
