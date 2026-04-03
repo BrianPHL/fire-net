@@ -1,6 +1,7 @@
 import 'package:fire_net/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -28,6 +29,7 @@ import 'features/engineer/screens/system_diagnostics_screen.dart';
 import 'models/alert.dart';
 import 'models/sensor_node.dart';
 import 'services/onboarding_service.dart';
+import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,8 +58,12 @@ Future<void> main() async {
       }
     }
 
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
     // Initialize theme provider
     await ThemeProvider().init();
+
+    await NotificationService.instance.initialize();
   } catch (error, stackTrace) {
     debugPrint('Startup initialization failed: $error');
     debugPrintStack(stackTrace: stackTrace);
@@ -102,6 +108,7 @@ class FireNetApp extends StatelessWidget {
           );
 
           return MaterialApp(
+            navigatorKey: NotificationService.instance.navigatorKey,
             title: AppConstants.appName,
             debugShowCheckedModeBanner: false,
             theme: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
