@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import '../../routes/app_routes.dart';
 
 class AuthService {
   AuthService({
@@ -16,6 +17,45 @@ class AuthService {
 
   CollectionReference<Map<String, dynamic>> get _usersCollection =>
       _firestore.collection('users');
+
+  Stream<User?> authStateChanges() => _firebaseAuth.authStateChanges();
+
+  String routeForRole(String role) {
+    final normalizedRole = role.trim().toLowerCase();
+    if (normalizedRole == 'engineer' || normalizedRole == 'admin') {
+      return AppRoutes.engineerDashboard;
+    }
+    return AppRoutes.userHome;
+  }
+
+  Future<bool> hasValidSession({User? user}) async {
+    final candidate = user ?? _firebaseAuth.currentUser;
+    if (candidate == null) {
+      return false;
+    }
+
+    try {
+      await candidate.reload();
+      final refreshedUser = _firebaseAuth.currentUser;
+      if (refreshedUser == null) {
+        return false;
+      }
+
+      await refreshedUser.getIdTokenResult(true);
+      return true;
+    } on FirebaseAuthException catch (error) {
+      if (error.code == 'user-disabled' ||
+          error.code == 'user-not-found' ||
+          error.code == 'invalid-user-token' ||
+          error.code == 'user-token-expired') {
+        await _firebaseAuth.signOut();
+      }
+      return false;
+    } catch (error) {
+      debugPrint('Session validation error: $error');
+      return false;
+    }
+  }
 
   bool _isRetryableFirestoreError(String code) {
     return code == 'unauthenticated' ||
@@ -183,7 +223,7 @@ class AuthService {
       final data = snapshot.data();
       final role = (data?['role'] as String?)?.trim().toLowerCase();
 
-      if (role == 'engineer' || role == 'user') {
+      if (role == 'engineer' || role == 'admin' || role == 'user') {
         return role!;
       }
 

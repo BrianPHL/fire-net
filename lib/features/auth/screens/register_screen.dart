@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/helpers.dart';
-import '../../../routes/app_routes.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/firenet_logo.dart';
 import '../../../core/theme/theme_colors.dart';
@@ -65,9 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
 
-      final destination = _selectedRole == 'user'
-          ? AppRoutes.userHome
-          : AppRoutes.engineerDashboard;
+      final destination = _authService.routeForRole(_selectedRole);
 
       Navigator.pushReplacementNamed(context, destination);
     } on FirebaseAuthException catch (error) {

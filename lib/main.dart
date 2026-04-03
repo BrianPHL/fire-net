@@ -1,4 +1,5 @@
 import 'package:fire_net/firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,7 @@ import 'core/constants/app_constants.dart';
 import 'core/screens/splash_screen.dart';
 import 'routes/app_routes.dart';
 import 'features/onboarding/screens/onboarding_screen.dart';
+import 'features/auth/auth_service.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/user/screens/home_screen.dart';
@@ -222,34 +224,101 @@ class SplashScreenWrapper extends StatefulWidget {
 }
 
 class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
+  final _authService = AuthService();
+  late final Future<bool> _onboardingFuture;
+  String? _lastResolvedUid;
+  Future<String>? _routeForUserFuture;
+
   @override
   void initState() {
     super.initState();
-    _navigateAfterSplash();
+    _onboardingFuture = OnboardingService.isOnboardingComplete();
   }
 
-  Future<void> _navigateAfterSplash() async {
-    // Wait for splash screen animation to complete
-    await Future.delayed(const Duration(seconds: 3));
-    
-    if (!mounted) return;
-
-    // Check if onboarding has been completed
-    final onboardingComplete = await OnboardingService.isOnboardingComplete();
-    
-    if (!mounted) return;
-    
-    // Navigate based on onboarding status
-    final nextRoute = onboardingComplete ? AppRoutes.login : AppRoutes.onboarding;
-    
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed(nextRoute);
+  Future<String> _resolveRouteForAuthenticatedUser(User user) async {
+    final hasValidSession = await _authService.hasValidSession(user: user);
+    if (!hasValidSession) {
+      return AppRoutes.login;
     }
+
+    try {
+      final role = await _authService.getRoleForUser(uid: user.uid);
+      return _authService.routeForRole(role);
+    } on FirebaseAuthException {
+      await _authService.signOut();
+      return AppRoutes.login;
+    } catch (error) {
+      debugPrint('Startup role resolution failed: $error');
+      await _authService.signOut();
+      return AppRoutes.login;
+    }
+  }
+
+  Widget _screenForRoute(String routeName) {
+    switch (routeName) {
+      case AppRoutes.userHome:
+        return const HomeScreen();
+      case AppRoutes.engineerDashboard:
+        return const DashboardScreen();
+      case AppRoutes.onboarding:
+        return const OnboardingScreen();
+      case AppRoutes.login:
+      default:
+        return const LoginScreen();
+    }
+  }
+
+  Future<String> _getRouteFutureForUser(User user) {
+    if (_lastResolvedUid != user.uid || _routeForUserFuture == null) {
+      _lastResolvedUid = user.uid;
+      _routeForUserFuture = _resolveRouteForAuthenticatedUser(user);
+    }
+    return _routeForUserFuture!;
   }
 
   @override
   Widget build(BuildContext context) {
-    return const SplashScreen();
+    return FutureBuilder<bool>(
+      future: _onboardingFuture,
+      builder: (context, onboardingSnapshot) {
+        if (onboardingSnapshot.connectionState == ConnectionState.waiting) {
+          return const SplashScreen();
+        }
+
+        final onboardingComplete = onboardingSnapshot.data ?? false;
+        if (!onboardingComplete) {
+          return const OnboardingScreen();
+        }
+
+        return StreamBuilder<User?>(
+          stream: _authService.authStateChanges(),
+          builder: (context, authSnapshot) {
+            if (authSnapshot.connectionState == ConnectionState.waiting) {
+              return const SplashScreen();
+            }
+
+            final user = authSnapshot.data;
+            if (user == null) {
+              _lastResolvedUid = null;
+              _routeForUserFuture = null;
+              return const LoginScreen();
+            }
+
+            return FutureBuilder<String>(
+              future: _getRouteFutureForUser(user),
+              builder: (context, routeSnapshot) {
+                if (routeSnapshot.connectionState == ConnectionState.waiting) {
+                  return const SplashScreen();
+                }
+
+                final routeName = routeSnapshot.data ?? AppRoutes.login;
+                return _screenForRoute(routeName);
+              },
+            );
+          },
+        );
+      },
+    );
   }
 }
 

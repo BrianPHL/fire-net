@@ -43,8 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       final role = await _authService.getRoleForUser();
-      final destination =
-          role == 'engineer' ? AppRoutes.engineerDashboard : AppRoutes.userHome;
+      final destination = _authService.routeForRole(role);
 
       if (!mounted) {
         return;
