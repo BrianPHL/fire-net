@@ -42,7 +42,9 @@ class NotificationService {
     }
     _initialized = true;
 
-    await _configureLocalNotifications();
+    if (!kIsWeb) {
+      await _configureLocalNotifications();
+    }
     await _requestPermissions();
     // Topic subscriptions are only supported on mobile platforms (iOS/Android)
     if (!kIsWeb) {
@@ -80,11 +82,13 @@ class NotificationService {
       provisional: false,
     );
 
-    await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    if (!kIsWeb) {
+      await _messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    }
   }
 
   Future<void> _configureLocalNotifications() async {
@@ -131,6 +135,11 @@ class NotificationService {
   }
 
   void _handleForegroundMessage(RemoteMessage message) {
+    if (kIsWeb) {
+      _handleNotificationData(Map<String, dynamic>.from(message.data));
+      return;
+    }
+
     _showLocalNotification(message);
   }
 
@@ -149,6 +158,10 @@ class NotificationService {
   }
 
   Future<void> _showLocalNotification(RemoteMessage message) async {
+    if (kIsWeb) {
+      return;
+    }
+
     final title = message.notification?.title ?? _titleForData(message.data);
     final body = message.notification?.body ?? _bodyForData(message.data);
 
