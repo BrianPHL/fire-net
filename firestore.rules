@@ -30,13 +30,14 @@ service cloud.firestore {
       ]);
     }
 
-    function userCanAcknowledgeAlert() {
+    function userCanResolveAlert() {
       return request.resource.data.diff(resource.data).changedKeys().hasOnly([
-        'acknowledged',
-        'acknowledgedAt',
+        'status',
+        'resolvedAt',
+        'resolvedBy',
         'updatedAt'
       ])
-      && request.resource.data.acknowledged == true;
+      && request.resource.data.status == 'resolved';
     }
 
     // users/{uid}
@@ -63,7 +64,7 @@ service cloud.firestore {
     }
 
     // alerts/{alertId}
-    // - Signed-in users can read and acknowledge alerts.
+    // - Signed-in users can read and resolve alerts.
     // - Engineers/Admins have full control.
     match /alerts/{alertId} {
       allow read: if isSignedIn();
@@ -74,7 +75,7 @@ service cloud.firestore {
       );
 
       allow update: if isEngineerOrAdmin() || (
-        isSignedIn() && userCanAcknowledgeAlert()
+        isSignedIn() && userCanResolveAlert()
       );
 
       allow delete: if isEngineerOrAdmin();

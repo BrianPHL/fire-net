@@ -1,4 +1,4 @@
-import '../core/constants/sensor_thresholds.dart';
+import '../core/utils/severity_evaluator.dart';
 
 /// Sensor node model representing a physical sensor device
 class SensorNode {
@@ -178,19 +178,11 @@ class SensorNode {
     required double gas,
     required bool hasSensorError,
   }) {
-    if (hasSensorError ||
-        temperature >= SensorThresholds.tempDanger ||
-        smoke >= SensorThresholds.smokeDanger ||
-        gas >= SensorThresholds.gasDanger) {
-      return SensorThresholds.severityDanger;
-    }
-
-    if (temperature >= SensorThresholds.tempWarning ||
-        smoke >= SensorThresholds.smokeWarning ||
-        gas >= SensorThresholds.gasWarning) {
-      return SensorThresholds.severityWarning;
-    }
-
-    return SensorThresholds.severitySafe;
+    return SeverityEvaluator.evaluateSeverity(
+      temperature: temperature,
+      smoke: smoke,
+      gas: gas,
+      hasSensorError: hasSensorError,
+    );
   }
 }

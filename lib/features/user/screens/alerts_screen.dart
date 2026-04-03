@@ -1,18 +1,20 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
+import '../../../services/alert_service.dart';
 import '../../../shared/layouts/app_scaffold.dart';
 import '../../../shared/widgets/app_section_header.dart';
 import '../../../shared/widgets/status_pill.dart';
 import '../../auth/auth_service.dart';
+import '../user_service.dart';
 import '../widgets/alert_card.dart';
 
-/// Active alerts screen showing current unresolved alerts
 class AlertsScreen extends StatefulWidget {
   const AlertsScreen({super.key});
 
@@ -22,12 +24,26 @@ class AlertsScreen extends StatefulWidget {
 
 class _AlertsScreenState extends State<AlertsScreen> {
   int _currentIndex = 1;
-  final _authService = AuthService();
+  String _selectedSeverity = 'all';
 
-  // Mock data
-  final List<Alert> _alerts = Alert.getMockAlerts()
-      .where((alert) => alert.isActive)
-      .toList();
+  final _authService = AuthService();
+  final _alertService = AlertService();
+  final _userService = UserService();
+
+  @override
+  void initState() {
+    super.initState();
+    _alertService.startAutoGeneration(
+      sensorStream: _userService.streamSensorNodes(),
+      createdBy: FirebaseAuth.instance.currentUser?.uid,
+    );
+  }
+
+  @override
+  void dispose() {
+    _alertService.stopAutoGeneration();
+    super.dispose();
+  }
 
   void _onNavigationChanged(int index) {
     setState(() => _currentIndex = index);
@@ -37,7 +53,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
         Navigator.pushReplacementNamed(context, AppRoutes.userHome);
         break;
       case 1:
-        // Already on alerts
         break;
       case 2:
         Navigator.pushReplacementNamed(context, AppRoutes.alertHistory);
@@ -66,11 +81,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
         return;
       }
 
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.login,
-        (route) => false,
-      );
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
     } on FirebaseAuthException catch (error) {
       if (!mounted) {
         return;
@@ -85,10 +96,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
         return;
       }
 
-      ErrorDialogHelper.showSnackbarError(
-        context,
-        'Unable to logout. Please try again.',
-      );
+      ErrorDialogHelper.showSnackbarError(context, 'Unable to logout. Please try again.');
     }
   }
 
@@ -100,14 +108,49 @@ class _AlertsScreenState extends State<AlertsScreen> {
       onNavigationChanged: _onNavigationChanged,
       onLogout: _handleLogout,
       body: SafeArea(
-        child: CustomScrollView(slivers: [_buildHeader(), _buildAlertsList()]),
+        child: StreamBuilder<List<Alert>>(
+          stream: _alertService.watchAlerts(status: Alert.statusActive),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Failed to load alerts.',
+                  style: TextStyle(color: ThemeColors.getTextPrimary(context)),
+                ),
+              );
+            }
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final activeAlerts = snapshot.data ?? <Alert>[];
+            final filteredAlerts = _applySeverityFilter(activeAlerts);
+
+            return CustomScrollView(
+              slivers: [
+                _buildHeader(activeAlerts),
+                _buildSeverityFilter(context),
+                _buildAlertsList(filteredAlerts),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    final dangerCount = _alerts.where((a) => a.severity == 'danger').length;
-    final warningCount = _alerts.where((a) => a.severity == 'warning').length;
+  List<Alert> _applySeverityFilter(List<Alert> alerts) {
+    if (_selectedSeverity == 'all') {
+      return alerts;
+    }
+    return alerts.where((alert) => alert.severity == _selectedSeverity).toList();
+  }
+
+  Widget _buildHeader(List<Alert> alerts) {
+    final dangerCount = alerts.where((a) => a.severity == Alert.severityDanger).length;
+    final warningCount = alerts.where((a) => a.severity == Alert.severityWarning).length;
+    final safeCount = alerts.where((a) => a.severity == Alert.severitySafe).length;
 
     return SliverToBoxAdapter(
       child: Padding(
@@ -122,7 +165,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   builder: (context, themeProvider, _) {
                     return AppSectionHeader(
                       title: 'Active Alerts',
-                      subtitle: 'Monitor unresolved warning and danger events',
+                      subtitle: 'Live Firestore stream of unresolved events',
                       trailing: StatusPill(
                         label: 'Live Feed',
                         color: ThemeColors.getWarning(context),
@@ -137,25 +180,23 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   spacing: 10,
                   runSpacing: 10,
                   children: [
-                    Consumer<ThemeProvider>(
-                      builder: (context, themeProvider, _) {
-                        return StatusPill(
-                          label: '$dangerCount danger',
-                          color: ThemeColors.getDanger(context),
-                          backgroundColor: ThemeColors.getDangerBackground(context),
-                          icon: Icons.local_fire_department,
-                        );
-                      },
+                    StatusPill(
+                      label: '$dangerCount danger',
+                      color: ThemeColors.getDanger(context),
+                      backgroundColor: ThemeColors.getDangerBackground(context),
+                      icon: Icons.local_fire_department,
                     ),
-                    Consumer<ThemeProvider>(
-                      builder: (context, themeProvider, _) {
-                        return StatusPill(
-                          label: '$warningCount warning',
-                          color: ThemeColors.getWarning(context),
-                          backgroundColor: ThemeColors.getWarningBackground(context),
-                          icon: Icons.warning_amber,
-                        );
-                      },
+                    StatusPill(
+                      label: '$warningCount warning',
+                      color: ThemeColors.getWarning(context),
+                      backgroundColor: ThemeColors.getWarningBackground(context),
+                      icon: Icons.warning_amber,
+                    ),
+                    StatusPill(
+                      label: '$safeCount safe',
+                      color: ThemeColors.getSafe(context),
+                      backgroundColor: ThemeColors.getSafeBackground(context),
+                      icon: Icons.check_circle,
                     ),
                   ],
                 ),
@@ -167,8 +208,37 @@ class _AlertsScreenState extends State<AlertsScreen> {
     );
   }
 
-  Widget _buildAlertsList() {
-    if (_alerts.isEmpty) {
+  Widget _buildSeverityFilter(BuildContext context) {
+    const options = <String, String>{
+      'all': 'All',
+      Alert.severitySafe: 'Safe',
+      Alert.severityWarning: 'Warning',
+      Alert.severityDanger: 'Danger',
+    };
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: options.entries.map((entry) {
+            final isSelected = _selectedSeverity == entry.key;
+            return ChoiceChip(
+              label: Text(entry.value),
+              selected: isSelected,
+              onSelected: (_) {
+                setState(() => _selectedSeverity = entry.key);
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlertsList(List<Alert> alerts) {
+    if (alerts.isEmpty) {
       return SliverFillRemaining(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -201,21 +271,17 @@ class _AlertsScreenState extends State<AlertsScreen> {
     }
 
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
-          final alert = _alerts[index];
+          final alert = alerts[index];
           return AlertCard(
             alert: alert,
             onTap: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.alertDetail,
-                arguments: alert,
-              );
+              Navigator.pushNamed(context, AppRoutes.alertDetail, arguments: alert);
             },
           );
-        }, childCount: _alerts.length),
+        }, childCount: alerts.length),
       ),
     );
   }

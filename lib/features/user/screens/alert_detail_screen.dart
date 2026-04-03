@@ -1,19 +1,69 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
 import '../../../routes/app_routes.dart';
+import '../../../services/alert_service.dart';
 import '../../../shared/widgets/status_pill.dart';
 
-/// Alert detail screen showing comprehensive alert information
-class AlertDetailScreen extends StatelessWidget {
+class AlertDetailScreen extends StatefulWidget {
+  const AlertDetailScreen({super.key, required this.alert});
+
   final Alert alert;
 
-  const AlertDetailScreen({
-    super.key,
-    required this.alert,
-  });
+  @override
+  State<AlertDetailScreen> createState() => _AlertDetailScreenState();
+}
+
+class _AlertDetailScreenState extends State<AlertDetailScreen> {
+  final _alertService = AlertService();
+  bool _isResolving = false;
+
+  Alert get _alert => widget.alert;
+
+  Future<void> _resolveAlert() async {
+    if (!_alert.isActive || _isResolving) {
+      return;
+    }
+
+    final confirmed = await ErrorDialogHelper.showConfirmationDialog(
+      context,
+      title: 'Resolve Alert',
+      message: 'Mark this alert as resolved?',
+      confirmText: 'Resolve',
+      cancelText: 'Cancel',
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setState(() => _isResolving = true);
+
+    try {
+      await _alertService.resolveAlert(
+        alertId: _alert.id,
+        resolvedBy: FirebaseAuth.instance.currentUser?.uid,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      ErrorDialogHelper.showSnackbarSuccess(context, 'Alert resolved successfully.');
+      Navigator.pop(context, true);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ErrorDialogHelper.showSnackbarError(context, 'Failed to resolve alert. Please try again.');
+      setState(() => _isResolving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,17 +72,15 @@ class AlertDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Alert Details'),
         actions: [
-          Builder(
-            builder: (context) => Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: StatusPill(
-                label: alert.isActive ? 'Active' : 'Resolved',
-                color: alert.isActive ? ThemeColors.getDanger(context) : ThemeColors.getSafe(context),
-                backgroundColor: alert.isActive 
-                    ? ThemeColors.getDangerBackground(context) 
-                    : ThemeColors.getSafeBackground(context),
-                icon: alert.isActive ? Icons.warning_amber : Icons.check_circle,
-              ),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: StatusPill(
+              label: _alert.isActive ? 'Active' : 'Resolved',
+              color: _alert.isActive ? ThemeColors.getDanger(context) : ThemeColors.getSafe(context),
+              backgroundColor: _alert.isActive
+                  ? ThemeColors.getDangerBackground(context)
+                  : ThemeColors.getSafeBackground(context),
+              icon: _alert.isActive ? Icons.warning_amber : Icons.check_circle,
             ),
           ),
         ],
@@ -49,6 +97,23 @@ class AlertDetailScreen extends StatelessWidget {
             _buildExplanationCard(context),
             const SizedBox(height: 16),
             _buildSensorNavigation(context),
+            if (_alert.isActive) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isResolving ? null : _resolveAlert,
+                  icon: _isResolving
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.task_alt),
+                  label: Text(_isResolving ? 'Resolving...' : 'Resolve Alert'),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -76,43 +141,35 @@ class AlertDetailScreen extends StatelessWidget {
                   color: _getSeverityColor(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  _getAlertIcon(),
-                  color: _getSeverityColor(context),
-                  size: 28,
-                ),
+                child: Icon(_getAlertIcon(), color: _getSeverityColor(context), size: 28),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getSeverityColor(context).withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        alert.severity == 'danger' ? 'Danger Alert' : 'Warning Alert',
-                        style: TextStyle(
-                          color: _getSeverityColor(context),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _getSeverityColor(context).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _alert.severity == Alert.severityDanger
+                        ? 'Danger Alert'
+                        : _alert.severity == Alert.severitySafe
+                        ? 'Safe Alert'
+                        : 'Warning Alert',
+                    style: TextStyle(
+                      color: _getSeverityColor(context),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Text(
-            alert.title,
+            _alert.title,
             style: TextStyle(
               color: _getSeverityColor(context),
               fontSize: 24,
@@ -120,11 +177,8 @@ class AlertDetailScreen extends StatelessWidget {
             ),
           ),
           Text(
-            alert.description,
-            style: TextStyle(
-              color: ThemeColors.getTextPrimary(context),
-              fontSize: 16,
-            ),
+            _alert.description,
+            style: TextStyle(color: ThemeColors.getTextPrimary(context), fontSize: 16),
           ),
         ],
       ),
@@ -138,13 +192,7 @@ class AlertDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow(
-              context,
-              Icons.location_on,
-              'Affected Node',
-              alert.nodeName,
-              alert.location,
-            ),
+            _buildInfoRow(context, Icons.location_on, 'Affected Node', _alert.nodeName, _alert.location),
             const SizedBox(height: 16),
             const Divider(height: 1),
             const SizedBox(height: 16),
@@ -152,10 +200,10 @@ class AlertDetailScreen extends StatelessWidget {
               context,
               Icons.calendar_today,
               'Triggered',
-              Helpers.formatDateTime(alert.triggeredAt),
+              Helpers.formatDateTime(_alert.triggeredAt),
               null,
             ),
-            if (alert.isResolved) ...[
+            if (_alert.isResolved && _alert.resolvedAt != null) ...[
               const SizedBox(height: 16),
               const Divider(height: 1),
               const SizedBox(height: 16),
@@ -163,7 +211,7 @@ class AlertDetailScreen extends StatelessWidget {
                 context,
                 Icons.check_circle,
                 'Resolved',
-                Helpers.formatDateTime(alert.resolvedAt!),
+                Helpers.formatDateTime(_alert.resolvedAt!),
                 null,
               ),
             ],
@@ -198,10 +246,7 @@ class AlertDetailScreen extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  color: ThemeColors.getTextPrimary(context),
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: ThemeColors.getTextPrimary(context), fontSize: 12),
               ),
               const SizedBox(height: 2),
               Text(
@@ -214,13 +259,7 @@ class AlertDetailScreen extends StatelessWidget {
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
-                ),
+                Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
               ],
             ],
           ),
@@ -238,11 +277,7 @@ class AlertDetailScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.lightbulb_outline,
-                  color: ThemeColors.getTextPrimary(context),
-                  size: 20,
-                ),
+                Icon(Icons.lightbulb_outline, color: ThemeColors.getTextPrimary(context), size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'Alert Explanation',
@@ -256,7 +291,7 @@ class AlertDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              alert.explanation ?? alert.description,
+              _alert.explanation ?? _alert.description,
               style: TextStyle(
                 color: ThemeColors.getTextSecondary(context),
                 fontSize: 14,
@@ -274,7 +309,6 @@ class AlertDetailScreen extends StatelessWidget {
       color: ThemeColors.getCardBackgroundLight(context),
       child: InkWell(
         onTap: () {
-          // Navigate to sensor detail - in real app, pass sensor data
           Navigator.pushNamed(context, AppRoutes.sensorDetail);
         },
         borderRadius: BorderRadius.circular(16),
@@ -289,11 +323,7 @@ class AlertDetailScreen extends StatelessWidget {
                   color: ThemeColors.getPrimary(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  Icons.sensors,
-                  color: ThemeColors.getPrimary(context),
-                  size: 20,
-                ),
+                child: Icon(Icons.sensors, color: ThemeColors.getPrimary(context), size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -311,19 +341,12 @@ class AlertDetailScreen extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'See real-time readings and trends',
-                      style: TextStyle(
-                        color: ThemeColors.getTextSecondary(context),
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: ThemeColors.getTextSecondary(context), fontSize: 14),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: ThemeColors.getPrimary(context),
-                size: 20,
-              ),
+              Icon(Icons.arrow_forward_ios, color: ThemeColors.getPrimary(context), size: 20),
             ],
           ),
         ),
@@ -332,18 +355,32 @@ class AlertDetailScreen extends StatelessWidget {
   }
 
   Color _getSeverityColor(BuildContext context) {
-    return alert.severity == 'danger' ? ThemeColors.getDanger(context) : ThemeColors.getWarning(context);
+    if (_alert.severity == Alert.severityDanger) {
+      return ThemeColors.getDanger(context);
+    }
+    if (_alert.severity == Alert.severitySafe) {
+      return ThemeColors.getSafe(context);
+    }
+    return ThemeColors.getWarning(context);
   }
 
   Color _getSeverityBackgroundColor(BuildContext context) {
-    return alert.severity == 'danger' 
-        ? ThemeColors.getDangerBackground(context)
-        : ThemeColors.getWarningBackground(context);
+    if (_alert.severity == Alert.severityDanger) {
+      return ThemeColors.getDangerBackground(context);
+    }
+    if (_alert.severity == Alert.severitySafe) {
+      return ThemeColors.getSafeBackground(context);
+    }
+    return ThemeColors.getWarningBackground(context);
   }
 
   IconData _getAlertIcon() {
-    return alert.severity == 'danger'
-        ? Icons.local_fire_department
-        : Icons.warning_amber;
+    if (_alert.severity == Alert.severityDanger) {
+      return Icons.local_fire_department;
+    }
+    if (_alert.severity == Alert.severitySafe) {
+      return Icons.check_circle;
+    }
+    return Icons.warning_amber;
   }
 }
