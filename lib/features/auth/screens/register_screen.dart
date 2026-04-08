@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/helpers.dart';
+import '../../../routes/app_routes.dart';
 import '../../../shared/widgets/custom_button.dart';
 import '../../../shared/widgets/firenet_logo.dart';
 import '../../../core/theme/theme_colors.dart';
@@ -161,9 +162,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(height: 24),
           Text(
             'Join FireNet',
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
@@ -371,7 +372,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         TextButton(
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.login,
+              (route) => false,
+            );
           },
           child: Text(
             'Sign In',
