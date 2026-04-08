@@ -23,7 +23,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
     OnboardingPage(
       title: 'Multi-Node Monitoring',
-      description: 'Monitor multiple sensor nodes across your space in real-time',
+      description:
+          'Monitor multiple sensor nodes across your space in real-time',
       icon: Icons.router_outlined,
       color: AppColors.danger,
     ),
@@ -77,8 +78,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _skipToEnd() {
-    _pageController.jumpToPage(_pages.length - 1);
+  Future<void> _skipToRegister() async {
+    await OnboardingService.markOnboardingComplete();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.register);
+    }
   }
 
   Future<void> _getStarted() async {
@@ -115,7 +119,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             right: 0,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -125,7 +132,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             onPressed: _previousPage,
                             icon: Icon(
                               Icons.arrow_back_ios,
-                              color: Theme.of(context).textTheme.titleLarge?.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.titleLarge?.color,
                             ),
                             color: AppColors.textPrimary,
                           )
@@ -133,7 +142,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     // Skip button
                     if (_currentPage < _pages.length - 1)
                       TextButton(
-                        onPressed: _skipToEnd,
+                        onPressed: _skipToRegister,
                         child: const Text(
                           'Skip',
                           style: TextStyle(
@@ -181,7 +190,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           OutlinedButton(
                             onPressed: _previousPage,
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                               side: const BorderSide(
                                 color: AppColors.danger,
                                 width: 1.5,
@@ -221,14 +233,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 : _nextPage,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.danger,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             child: _currentPage == _pages.length - 1
                                 ? const Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Get Started',
@@ -246,7 +262,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     ],
                                   )
                                 : const Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Next',
@@ -288,7 +305,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         width: isActive ? 24 : 8,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.danger : AppColors.danger.withValues(alpha: 0.3),
+          color: isActive
+              ? AppColors.danger
+              : AppColors.danger.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(4),
         ),
       ),
@@ -308,11 +327,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             shape: BoxShape.circle,
             color: page.color.withValues(alpha: 0.15),
           ),
-          child: Icon(
-            page.icon,
-            size: 64,
-            color: page.color,
-          ),
+          child: Icon(page.icon, size: 64, color: page.color),
         ),
 
         // Title - uses theme-aware text color
@@ -339,9 +354,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             builder: (context) => Text(
               page.description,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                letterSpacing: 0.2,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(letterSpacing: 0.2),
             ),
           ),
         ),
