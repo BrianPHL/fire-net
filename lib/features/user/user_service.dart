@@ -60,9 +60,17 @@ class UserService {
 
   bool _isSingleNodePayload(Map<dynamic, dynamic> value) {
     return value.containsKey('temperature') ||
+        value.containsKey('mq2') ||
+        value.containsKey('mq7') ||
         value.containsKey('smoke') ||
         value.containsKey('humidity') ||
         value.containsKey('gasLevel') ||
-        value.containsKey('gas');
+        value.containsKey('gas') ||
+        value.containsKey('mlxAmbient') ||
+        value.containsKey('mlxObject') ||
+        value.containsKey('fireDetected') ||
+        value.containsKey('readings') ||
+        value.containsKey('sensorData') ||
+        value.containsKey('sensors');
   }
 }

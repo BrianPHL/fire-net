@@ -35,7 +35,10 @@ class AlertService {
     });
   }
 
-  Future<void> resolveAlert({required String alertId, String? resolvedBy}) async {
+  Future<void> resolveAlert({
+    required String alertId,
+    String? resolvedBy,
+  }) async {
     try {
       await _alertsRef.doc(alertId).update(<String, dynamic>{
         'status': Alert.statusResolved,
@@ -66,7 +69,10 @@ class AlertService {
     _lastSeverityByNode.clear();
   }
 
-  Future<void> _processNode({required SensorNode node, String? createdBy}) async {
+  Future<void> _processNode({
+    required SensorNode node,
+    String? createdBy,
+  }) async {
     final evaluation = SeverityEvaluator.evaluate(
       temperature: node.temperature,
       smoke: node.smoke,
@@ -145,7 +151,10 @@ class AlertService {
     }
   }
 
-  Future<void> _createRecoveryAlert({required SensorNode node, String? createdBy}) async {
+  Future<void> _createRecoveryAlert({
+    required SensorNode node,
+    String? createdBy,
+  }) async {
     final documentRef = _alertsRef.doc();
     final now = DateTime.now();
     final alert = Alert(
@@ -160,7 +169,7 @@ class AlertService {
       status: Alert.statusResolved,
       resolvedAt: now,
       explanation:
-          'Temperature ${node.temperature.toStringAsFixed(1)} C, smoke ${node.smoke.toStringAsFixed(1)}, gas ${node.gas.toStringAsFixed(1)}. All metrics are within safe range.',
+          'Temperature ${node.temperature.toStringAsFixed(1)} C, carbon monoxide ${node.smoke.toStringAsFixed(1)}, gas ${node.gas.toStringAsFixed(1)}. All metrics are within safe range.',
       createdBy: createdBy,
       resolvedBy: createdBy,
     );
@@ -173,7 +182,10 @@ class AlertService {
     }
   }
 
-  Future<void> _resolveActiveAlertsForNode(String nodeId, {String? resolvedBy}) async {
+  Future<void> _resolveActiveAlertsForNode(
+    String nodeId, {
+    String? resolvedBy,
+  }) async {
     final snapshot = await _alertsRef
         .where('nodeId', isEqualTo: nodeId)
         .where('status', isEqualTo: Alert.statusActive)
@@ -219,7 +231,7 @@ class AlertService {
     required List<String> exceededMetrics,
   }) {
     final metrics = exceededMetrics.isEmpty
-        ? 'temperature, smoke, or gas'
+        ? 'temperature, carbon monoxide, or gas'
         : exceededMetrics.join(', ');
 
     final label = severity == Alert.severityDanger ? 'critical' : 'warning';
@@ -227,6 +239,6 @@ class AlertService {
     return '${node.name} at ${node.location} triggered a $label event. '
         'Exceeded metrics: $metrics. '
         'Current readings: ${node.temperature.toStringAsFixed(1)} C, '
-        'smoke ${node.smoke.toStringAsFixed(1)}, gas ${node.gas.toStringAsFixed(1)}.';
+        'carbon monoxide ${node.smoke.toStringAsFixed(1)}, gas ${node.gas.toStringAsFixed(1)}.';
   }
 }

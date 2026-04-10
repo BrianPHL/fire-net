@@ -68,10 +68,7 @@ class SensorCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                sensor.name,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              Text(sensor.name, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 2),
               Text(
                 sensor.location,
@@ -101,6 +98,7 @@ class SensorCard extends StatelessWidget {
               Icons.thermostat,
               ThemeColors.getTemperatureColor(context),
               '${sensor.temperature.toStringAsFixed(1)}°',
+              label: 'Temp',
             ),
             const SizedBox(width: 16),
             _buildReadingItem(
@@ -108,6 +106,7 @@ class SensorCard extends StatelessWidget {
               Icons.water_drop,
               ThemeColors.getPrimary(context),
               '${sensor.humidity.toStringAsFixed(1)}%',
+              label: 'Humidity',
               isUnavailable: !sensor.hasHumidityReading,
             ),
           ],
@@ -120,6 +119,7 @@ class SensorCard extends StatelessWidget {
               Icons.smoke_free,
               ThemeColors.getSmokeColor(context),
               sensor.hasSmokeReading ? sensor.smoke.toStringAsFixed(1) : 'N/A',
+              label: 'CO',
               isUnavailable: !sensor.hasSmokeReading,
             ),
             const SizedBox(width: 16),
@@ -128,6 +128,7 @@ class SensorCard extends StatelessWidget {
               Icons.local_fire_department,
               ThemeColors.getGasColor(context),
               sensor.gas.toStringAsFixed(1),
+              label: 'Gas',
             ),
           ],
         ),
@@ -139,40 +140,58 @@ class SensorCard extends StatelessWidget {
     BuildContext context,
     IconData icon,
     Color color,
-    String value,
-    {bool isUnavailable = false}
-  ) {
+    String value, {
+    String? label,
+    bool isUnavailable = false,
+  }) {
     return Expanded(
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 4),
           Expanded(
-            child: isUnavailable
-                ? Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      child: StatusPill(
-                        label: 'Unavailable',
-                        color: ThemeColors.getWarning(context),
-                        backgroundColor: ThemeColors.getWarningBackground(context),
-                        icon: Icons.warning_amber,
-                      ),
-                    ),
-                  )
-                : Text(
-                    value,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (label != null)
+                  Text(
+                    label,
                     style: TextStyle(
-                      color: ThemeColors.getTextPrimary(context),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      color: ThemeColors.getTextSecondary(context),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
+                if (label != null) const SizedBox(height: 2),
+                isUnavailable
+                    ? Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          child: StatusPill(
+                            label: 'Unavailable',
+                            color: ThemeColors.getWarning(context),
+                            backgroundColor: ThemeColors.getWarningBackground(
+                              context,
+                            ),
+                            icon: Icons.warning_amber,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        value,
+                        style: TextStyle(
+                          color: ThemeColors.getTextPrimary(context),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ],
+            ),
           ),
         ],
       ),
@@ -182,7 +201,11 @@ class SensorCard extends StatelessWidget {
   Widget _buildFooter(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.access_time, size: 14, color: ThemeColors.getTextSecondary(context)),
+        Icon(
+          Icons.access_time,
+          size: 14,
+          color: ThemeColors.getTextSecondary(context),
+        ),
         const SizedBox(width: 4),
         Text(
           'Updated ${Helpers.getRelativeTime(sensor.lastUpdated)}',
@@ -196,7 +219,11 @@ class SensorCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Icon(Icons.arrow_forward_ios, size: 12, color: ThemeColors.getPrimary(context)),
+        Icon(
+          Icons.arrow_forward_ios,
+          size: 12,
+          color: ThemeColors.getPrimary(context),
+        ),
       ],
     );
   }

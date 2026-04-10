@@ -154,7 +154,7 @@ class SensorDetailScreen extends StatelessWidget {
             Expanded(
               child: _buildReadingCard(
                 context,
-                'Smoke',
+                'Carbon Monoxide',
                 sensor.smoke,
                 'ppm',
                 Icons.smoke_free,
@@ -179,6 +179,36 @@ class SensorDetailScreen extends StatelessWidget {
             ),
           ],
         ),
+        if (sensor.hasMlxAmbientReading || sensor.hasMlxObjectReading) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildReadingCard(
+                  context,
+                  'IR Ambient',
+                  sensor.mlxAmbient ?? 0,
+                  '°C',
+                  Icons.thermostat,
+                  ThemeColors.getTemperatureColor(context),
+                  isAvailable: sensor.hasMlxAmbientReading,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildReadingCard(
+                  context,
+                  'IR Object',
+                  sensor.mlxObject ?? 0,
+                  '°C',
+                  Icons.center_focus_strong,
+                  ThemeColors.getTemperatureColor(context),
+                  isAvailable: sensor.hasMlxObjectReading,
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -189,9 +219,9 @@ class SensorDetailScreen extends StatelessWidget {
     double value,
     String unit,
     IconData icon,
-    Color color,
-    {bool isAvailable = true}
-  ) {
+    Color color, {
+    bool isAvailable = true,
+  }) {
     return Card(
       color: ThemeColors.getCardBackgroundLight(context),
       child: Padding(
@@ -471,6 +501,7 @@ class SensorDetailScreen extends StatelessWidget {
         return 'Offline';
     }
   }
+
   IconData _getStatusIcon() {
     switch (sensor.status) {
       case 'danger':

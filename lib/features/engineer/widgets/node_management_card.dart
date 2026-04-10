@@ -48,7 +48,9 @@ class NodeManagementCard extends StatelessWidget {
                             StatusPill(
                               label: 'Online',
                               color: ThemeColors.getSafe(context),
-                              backgroundColor: ThemeColors.getSafeBackground(context),
+                              backgroundColor: ThemeColors.getSafeBackground(
+                                context,
+                              ),
                               icon: Icons.check_circle,
                             ),
                           ],
@@ -118,7 +120,7 @@ class NodeManagementCard extends StatelessWidget {
                               value: node.hasSmokeReading
                                   ? node.smoke.toStringAsFixed(0)
                                   : 'N/A',
-                              label: 'Smoke',
+                              label: 'CO (MQ7)',
                               color: AppColors.smokeColor,
                             ),
                           ),
@@ -127,12 +129,41 @@ class NodeManagementCard extends StatelessWidget {
                             child: ReadingCard(
                               icon: Icons.science,
                               value: node.gas.toStringAsFixed(0),
-                              label: 'Gas',
+                              label: 'Gas (MQ2)',
                               color: AppColors.gasColor,
                             ),
                           ),
                         ],
                       ),
+                      if (node.hasMlxAmbientReading ||
+                          node.hasMlxObjectReading) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ReadingCard(
+                                icon: Icons.thermostat,
+                                value: node.hasMlxAmbientReading
+                                    ? (node.mlxAmbient ?? 0).toStringAsFixed(1)
+                                    : 'N/A',
+                                label: 'IR Ambient',
+                                color: AppColors.temperatureColor,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ReadingCard(
+                                icon: Icons.center_focus_strong,
+                                value: node.hasMlxObjectReading
+                                    ? (node.mlxObject ?? 0).toStringAsFixed(1)
+                                    : 'N/A',
+                                label: 'IR Object',
+                                color: AppColors.temperatureColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 24),
 
                       // Device Health
@@ -160,7 +191,10 @@ class NodeManagementCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: ThemeColors.getBorderColor(context), width: 1),
+                          border: Border.all(
+                            color: ThemeColors.getBorderColor(context),
+                            width: 1,
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -182,7 +216,9 @@ class NodeManagementCard extends StatelessWidget {
                             StatusPill(
                               label: _getStatusLabel(node.status),
                               color: statusColor,
-                              backgroundColor: ThemeColors.getSafeBackground(context),
+                              backgroundColor: ThemeColors.getSafeBackground(
+                                context,
+                              ),
                             ),
                           ],
                         ),
@@ -249,19 +285,20 @@ class ReadingCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(
-                icon,
-                color: color,
-                size: 28,
-              ),
+              Icon(icon, color: color, size: 28),
               const SizedBox(height: 8),
               if (isUnavailable)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: ThemeColors.getWarningBackground(context),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.warning.withValues(alpha: 0.6)),
+                    border: Border.all(
+                      color: AppColors.warning.withValues(alpha: 0.6),
+                    ),
                   ),
                   child: const Text(
                     'Unavailable',
@@ -275,15 +312,12 @@ class ReadingCard extends StatelessWidget {
               else
                 Text(
                   value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               const SizedBox(height: 2),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(label, style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
         );
@@ -320,10 +354,7 @@ class DeviceHealthIndicator extends StatelessWidget {
                   color: ThemeColors.getTextSecondary(context),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text(label, style: Theme.of(context).textTheme.bodyMedium),
                 const Spacer(),
                 Text(
                   '$value %',
@@ -339,7 +370,11 @@ class DeviceHealthIndicator extends StatelessWidget {
                 minHeight: 8,
                 backgroundColor: ThemeColors.getCardBackgroundLight(context),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  value >= 70 ? ThemeColors.getSafe(context) : value >= 40 ? AppColors.warning : AppColors.danger,
+                  value >= 70
+                      ? ThemeColors.getSafe(context)
+                      : value >= 40
+                      ? AppColors.warning
+                      : AppColors.danger,
                 ),
               ),
             ),
