@@ -53,14 +53,20 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
         return;
       }
 
-      ErrorDialogHelper.showSnackbarSuccess(context, 'Alert resolved successfully.');
+      ErrorDialogHelper.showSnackbarSuccess(
+        context,
+        'Alert resolved successfully.',
+      );
       Navigator.pop(context, true);
     } catch (_) {
       if (!mounted) {
         return;
       }
 
-      ErrorDialogHelper.showSnackbarError(context, 'Failed to resolve alert. Please try again.');
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        'Failed to resolve alert. Please try again.',
+      );
       setState(() => _isResolving = false);
     }
   }
@@ -76,7 +82,9 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: StatusPill(
               label: _alert.isActive ? 'Active' : 'Resolved',
-              color: _alert.isActive ? ThemeColors.getDanger(context) : ThemeColors.getSafe(context),
+              color: _alert.isActive
+                  ? ThemeColors.getDanger(context)
+                  : ThemeColors.getSafe(context),
               backgroundColor: _alert.isActive
                   ? ThemeColors.getDangerBackground(context)
                   : ThemeColors.getSafeBackground(context),
@@ -141,12 +149,19 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                   color: _getSeverityColor(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(_getAlertIcon(), color: _getSeverityColor(context), size: 28),
+                child: Icon(
+                  _getAlertIcon(),
+                  color: _getSeverityColor(context),
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _getSeverityColor(context).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
@@ -177,8 +192,11 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
             ),
           ),
           Text(
-            _alert.description,
-            style: TextStyle(color: ThemeColors.getTextPrimary(context), fontSize: 16),
+            _friendlyDescription(_alert.description),
+            style: TextStyle(
+              color: ThemeColors.getTextPrimary(context),
+              fontSize: 16,
+            ),
           ),
         ],
       ),
@@ -192,7 +210,13 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow(context, Icons.location_on, 'Affected Node', _alert.nodeName, _alert.location),
+            _buildInfoRow(
+              context,
+              Icons.location_on,
+              'Affected Node',
+              _alert.nodeName,
+              _alert.location,
+            ),
             const SizedBox(height: 16),
             const Divider(height: 1),
             const SizedBox(height: 16),
@@ -237,7 +261,11 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
             color: ThemeColors.getCardBackgroundLight(context),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: ThemeColors.getTextSecondary(context), size: 20),
+          child: Icon(
+            icon,
+            color: ThemeColors.getTextSecondary(context),
+            size: 20,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -246,7 +274,10 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(color: ThemeColors.getTextPrimary(context), fontSize: 12),
+                style: TextStyle(
+                  color: ThemeColors.getTextPrimary(context),
+                  fontSize: 12,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
@@ -259,7 +290,13 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
               ],
             ],
           ),
@@ -277,7 +314,11 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.lightbulb_outline, color: ThemeColors.getTextPrimary(context), size: 20),
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: ThemeColors.getTextPrimary(context),
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Alert Explanation',
@@ -291,7 +332,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              _alert.explanation ?? _alert.description,
+              _friendlyExplanation(_alert.explanation ?? _alert.description),
               style: TextStyle(
                 color: ThemeColors.getTextSecondary(context),
                 fontSize: 14,
@@ -323,7 +364,11 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                   color: ThemeColors.getPrimary(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.sensors, color: ThemeColors.getPrimary(context), size: 20),
+                child: Icon(
+                  Icons.sensors,
+                  color: ThemeColors.getPrimary(context),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -341,12 +386,19 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                     const SizedBox(height: 2),
                     Text(
                       'See real-time readings and trends',
-                      style: TextStyle(color: ThemeColors.getTextSecondary(context), fontSize: 14),
+                      style: TextStyle(
+                        color: ThemeColors.getTextSecondary(context),
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, color: ThemeColors.getPrimary(context), size: 20),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: ThemeColors.getPrimary(context),
+                size: 20,
+              ),
             ],
           ),
         ),
@@ -382,5 +434,50 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
       return Icons.check_circle;
     }
     return Icons.warning_amber;
+  }
+
+  String _friendlyDescription(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty || _looksTechnical(trimmed)) {
+      if (_alert.severity == Alert.severityDanger) {
+        return 'A critical safety condition was detected. Please inspect the area immediately.';
+      }
+      if (_alert.severity == Alert.severityWarning) {
+        return 'Unusual sensor activity was detected. Please check the area and stay alert.';
+      }
+      return 'Sensor conditions have returned to normal levels.';
+    }
+    return trimmed;
+  }
+
+  String _friendlyExplanation(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isNotEmpty && !_looksTechnical(trimmed)) {
+      return trimmed;
+    }
+
+    final severityLabel = _alert.severity == Alert.severityDanger
+        ? 'critical'
+        : _alert.severity == Alert.severityWarning
+        ? 'warning'
+        : 'safe';
+
+    final action = _alert.severity == Alert.severityDanger
+        ? 'Move people to safety, improve ventilation, and check for smoke or heat sources right away.'
+        : _alert.severity == Alert.severityWarning
+        ? 'Inspect the area, improve ventilation if needed, and continue monitoring sensor updates.'
+        : 'No immediate action is required. Keep monitoring the sensor feed.';
+
+    return '${_alert.nodeName} at ${_alert.location} reported a $severityLabel condition. $action';
+  }
+
+  bool _looksTechnical(String text) {
+    final value = text.toLowerCase();
+    return value.contains('[code:') ||
+        value.contains('alert code:') ||
+        value.contains('risk score:') ||
+        value.contains('confidence:') ||
+        value.contains('triggered rules:') ||
+        value.contains('exceeded metrics:');
   }
 }

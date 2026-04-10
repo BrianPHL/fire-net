@@ -49,9 +49,9 @@ class AlertCard extends StatelessWidget {
                           ),
                         const SizedBox(height: 4),
                         Text(
-                          alert.description,
+                          _previewDescription(),
                           style: TextStyle(
-                            color: ThemeColors.getTextSecondary(context)
+                            color: ThemeColors.getTextSecondary(context),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -65,22 +65,22 @@ class AlertCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    Helpers.getRelativeTime(alert.triggeredAt),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 4),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: ThemeColors.getTextSecondary(context),
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        Helpers.getRelativeTime(alert.triggeredAt),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: ThemeColors.getTextSecondary(context),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-              ],
-            );
+              );
             },
           ),
         ),
@@ -96,11 +96,7 @@ class AlertCard extends StatelessWidget {
         color: _getIconBackgroundColor(context),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(
-        _getIcon(),
-        color: _getIconColor(context),
-        size: 24,
-      ),
+      child: Icon(_getIcon(), color: _getIconColor(context), size: 24),
     );
   }
 
@@ -141,5 +137,29 @@ class AlertCard extends StatelessWidget {
       default:
         return ThemeColors.getCardBackgroundLight(context);
     }
+  }
+
+  String _previewDescription() {
+    final text = alert.description.trim();
+    if (text.isEmpty || _looksTechnical(text)) {
+      if (alert.severity == Alert.severityDanger) {
+        return 'Critical condition detected. Tap to view safety guidance.';
+      }
+      if (alert.severity == Alert.severityWarning) {
+        return 'Warning condition detected. Tap to view what to do next.';
+      }
+      return 'Conditions have returned to safe levels.';
+    }
+    return text;
+  }
+
+  bool _looksTechnical(String text) {
+    final value = text.toLowerCase();
+    return value.contains('[code:') ||
+        value.contains('alert code:') ||
+        value.contains('risk score:') ||
+        value.contains('confidence:') ||
+        value.contains('triggered rules:') ||
+        value.contains('exceeded metrics:');
   }
 }

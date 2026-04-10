@@ -94,6 +94,8 @@ class SensorNode {
           gas: gas,
           hasSensorError: sensorError,
           fireDetected: fireDetected,
+          mlxAmbient: mlxAmbient,
+          mlxObject: mlxObject,
         );
 
     return SensorNode(
@@ -240,16 +242,17 @@ class SensorNode {
     required double gas,
     required bool hasSensorError,
     bool fireDetected = false,
+    double? mlxAmbient,
+    double? mlxObject,
   }) {
-    if (fireDetected) {
-      return 'danger';
-    }
-
     return SeverityEvaluator.evaluateSeverity(
       temperature: temperature,
       smoke: smoke,
       gas: gas,
+      fireDetected: fireDetected,
       hasSensorError: hasSensorError,
+      mlxAmbient: mlxAmbient,
+      mlxObject: mlxObject,
     );
   }
 }

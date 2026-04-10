@@ -18,8 +18,12 @@ exports.sendAlertNotification = functions.firestore
       return null;
     }
 
-    const title = severity === 'danger' ? 'Danger Alert' : 'Warning Alert';
-    const body = `${alert.nodeName || 'Sensor'} at ${alert.location || 'Unknown location'} needs attention.`;
+    const fallbackTitle = severity === 'danger' ? 'Danger Alert' : 'Warning Alert';
+    const title = String(alert.title || fallbackTitle);
+    const body = String(
+      alert.description ||
+      `${alert.nodeName || 'Sensor'} at ${alert.location || 'Unknown location'} needs attention.`
+    );
 
     const triggeredAt = alert.triggeredAt && typeof alert.triggeredAt.toMillis === 'function'
       ? String(alert.triggeredAt.toMillis())
@@ -34,8 +38,8 @@ exports.sendAlertNotification = functions.firestore
       data: {
         screen: 'alertDetail',
         alertId: context.params.alertId,
-        title: String(alert.title || title),
-        description: String(alert.description || body),
+        title,
+        description: body,
         severity,
         nodeId: String(alert.nodeId || ''),
         nodeName: String(alert.nodeName || 'Unknown Node'),
