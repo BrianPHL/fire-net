@@ -78,11 +78,11 @@ class SeverityEvaluator {
     final hasMlxAmbient = mlxAmbient != null;
     final hasMlxObject = mlxObject != null;
     final thermalDelta = hasMlxAmbient && hasMlxObject
-        ? (mlxObject! - mlxAmbient!)
+        ? (mlxObject - mlxAmbient)
         : 0.0;
 
-    final irObjectWarning = hasMlxObject && mlxObject! >= _mlxObjectWarning;
-    final irObjectDanger = hasMlxObject && mlxObject! >= _mlxObjectDanger;
+    final irObjectWarning = hasMlxObject && mlxObject >= _mlxObjectWarning;
+    final irObjectDanger = hasMlxObject && mlxObject >= _mlxObjectDanger;
     final thermalDeltaWarning =
         hasMlxAmbient && hasMlxObject && thermalDelta >= _thermalDeltaWarning;
     final thermalDeltaDanger =
