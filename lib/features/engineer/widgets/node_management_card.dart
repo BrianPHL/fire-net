@@ -216,8 +216,8 @@ class NodeManagementCard extends StatelessWidget {
                             StatusPill(
                               label: _getStatusLabel(node.status),
                               color: statusColor,
-                              backgroundColor: ThemeColors.getSafeBackground(
-                                context,
+                              backgroundColor: _getStatusBackground(
+                                node.status, context
                               ),
                             ),
                           ],
@@ -242,6 +242,19 @@ class NodeManagementCard extends StatelessWidget {
         return ThemeColors.getWarning(context);
       case 'danger':
         return ThemeColors.getDanger(context);
+      default:
+        return ThemeColors.getTextSecondary(context);
+    }
+  }
+
+  Color _getStatusBackground(String status, BuildContext context) {
+    switch (status) {
+      case 'safe':
+        return ThemeColors.getSafeBackground(context);
+      case 'warning':
+        return ThemeColors.getWarningBackground(context);
+      case 'danger':
+        return ThemeColors.getDangerBackground(context);
       default:
         return ThemeColors.getTextSecondary(context);
     }
