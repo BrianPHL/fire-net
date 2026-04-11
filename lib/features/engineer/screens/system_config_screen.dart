@@ -17,7 +17,7 @@ class SystemConfigScreen extends StatefulWidget {
 class _SystemConfigScreenState extends State<SystemConfigScreen> {
   static const double _minValue = 0;
   static const double _temperatureMax = 100;
-  static const double _sensorMax = 500;
+  static const double _smokeAndGasMax = 2500;
 
   final ThresholdConfigService _thresholdConfigService =
       ThresholdConfigService();
@@ -110,13 +110,13 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                   warningLabel: 'Warning Threshold',
                   warningValue: activeConfig.smokeWarning,
                   warningMin: _minValue,
-                  warningMax: _sensorMax,
+                  warningMax: _smokeAndGasMax,
                   warningUnit: 'ppm',
                   onWarningChanged: (value) => _updateDraft(smokeWarning: value),
                   dangerLabel: 'Danger Threshold',
                   dangerValue: activeConfig.smokeDanger,
                   dangerMin: _minValue,
-                  dangerMax: _sensorMax,
+                  dangerMax: _smokeAndGasMax,
                   dangerUnit: 'ppm',
                   onDangerChanged: (value) => _updateDraft(smokeDanger: value),
                 ),
@@ -127,13 +127,13 @@ class _SystemConfigScreenState extends State<SystemConfigScreen> {
                   warningLabel: 'Warning Threshold',
                   warningValue: activeConfig.gasWarning,
                   warningMin: _minValue,
-                  warningMax: _sensorMax,
+                  warningMax: _smokeAndGasMax,
                   warningUnit: 'ppm',
                   onWarningChanged: (value) => _updateDraft(gasWarning: value),
                   dangerLabel: 'Danger Threshold',
                   dangerValue: activeConfig.gasDanger,
                   dangerMin: _minValue,
-                  dangerMax: _sensorMax,
+                  dangerMax: _smokeAndGasMax,
                   dangerUnit: 'ppm',
                   onDangerChanged: (value) => _updateDraft(gasDanger: value),
                 ),
