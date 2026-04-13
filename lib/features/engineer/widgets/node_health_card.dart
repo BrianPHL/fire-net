@@ -51,46 +51,6 @@ class NodeHealthCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
-
-            // Battery indicator (telemetry not currently provided by node payload)
-            Row(
-              children: [
-                Icon(
-                  Icons.battery_unknown,
-                  size: 20,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Battery telemetry unavailable',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Signal indicator (telemetry not currently provided by node payload)
-            Row(
-              children: [
-                Icon(
-                  Icons.signal_cellular_alt,
-                  size: 20,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Signal telemetry unavailable',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-              ],
-            ),
-
             const SizedBox(height: 12),
 
             // Last check-in

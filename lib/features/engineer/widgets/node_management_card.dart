@@ -164,25 +164,6 @@ class NodeManagementCard extends StatelessWidget {
                           ],
                         ),
                       ],
-                      const SizedBox(height: 24),
-
-                      // Device Health
-                      Text(
-                        'Device Health',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 16),
-                      const DeviceHealthIndicator(
-                        icon: Icons.battery_charging_full,
-                        label: 'Battery Level',
-                        value: 87,
-                      ),
-                      const SizedBox(height: 12),
-                      const DeviceHealthIndicator(
-                        icon: Icons.signal_cellular_alt,
-                        label: 'Signal Strength',
-                        value: 92,
-                      ),
                       const SizedBox(height: 20),
 
                       // Status info
@@ -333,65 +314,6 @@ class ReadingCard extends StatelessWidget {
               Text(label, style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
-        );
-      },
-    );
-  }
-}
-
-/// Device health indicator with progress bar
-class DeviceHealthIndicator extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final int value;
-
-  const DeviceHealthIndicator({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, _) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: ThemeColors.getTextSecondary(context),
-                ),
-                const SizedBox(width: 8),
-                Text(label, style: Theme.of(context).textTheme.bodyMedium),
-                const Spacer(),
-                Text(
-                  '$value %',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: value / 100,
-                minHeight: 8,
-                backgroundColor: ThemeColors.getCardBackgroundLight(context),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  value >= 70
-                      ? ThemeColors.getSafe(context)
-                      : value >= 40
-                      ? AppColors.warning
-                      : AppColors.danger,
-                ),
-              ),
-            ),
-          ],
         );
       },
     );

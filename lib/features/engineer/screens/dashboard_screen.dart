@@ -124,17 +124,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               const SizedBox(width: 16),
                               Expanded(
                                 child: SystemStatCard(
-                                  icon: Icons.battery_unknown,
-                                  value: 'N/A',
-                                  label: 'Battery Telemetry',
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: SystemStatCard(
-                                  icon: Icons.signal_cellular_alt,
-                                  value: 'N/A',
-                                  label: 'Signal Telemetry',
+                                  icon: Icons.notification_important,
+                                  value: '${activeAlerts.length}',
+                                  label: 'Active Alerts',
                                 ),
                               ),
                             ],
@@ -152,17 +144,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: SystemStatCard(
-                                  icon: Icons.battery_unknown,
-                                  value: 'N/A',
-                                  label: 'Battery Telemetry',
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: SystemStatCard(
-                                  icon: Icons.signal_cellular_alt,
-                                  value: 'N/A',
-                                  label: 'Signal Telemetry',
+                                  icon: Icons.notification_important,
+                                  value: '${activeAlerts.length}',
+                                  label: 'Active Alerts',
                                 ),
                               ),
                             ],

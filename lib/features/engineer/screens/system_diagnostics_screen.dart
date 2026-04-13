@@ -224,9 +224,6 @@ class _NodeHealthCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final batteryLevel = _getBatteryLevel(node.id);
-    final signalLevel = _getSignalLevel(node.id);
-
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, _) {
         return Container(
@@ -263,10 +260,6 @@ class _NodeHealthCard extends StatelessWidget {
                   _StatusBadge(isOnline: node.status.toLowerCase() != 'offline'),
                 ],
               ),
-              const SizedBox(height: 14),
-              _MetricRow(icon: Icons.battery_std, value: batteryLevel),
-              const SizedBox(height: 8),
-              _MetricRow(icon: Icons.network_cell, value: signalLevel),
               const SizedBox(height: 10),
               Text(
                 'Last check-in: ${_formatLastCheck(node.lastUpdated)}',
@@ -277,32 +270,6 @@ class _NodeHealthCard extends StatelessWidget {
         );
       },
     );
-  }
-
-  int _getBatteryLevel(String nodeId) {
-    switch (nodeId) {
-      case '1':
-        return 87;
-      case '2':
-        return 62;
-      case '3':
-        return 74;
-      default:
-        return 79;
-    }
-  }
-
-  int _getSignalLevel(String nodeId) {
-    switch (nodeId) {
-      case '1':
-        return 92;
-      case '2':
-        return 75;
-      case '3':
-        return 88;
-      default:
-        return 82;
-    }
   }
 
   String _formatLastCheck(DateTime dateTime) {
@@ -317,48 +284,6 @@ class _NodeHealthCard extends StatelessWidget {
       return '${difference.inHours}h ago';
     }
     return '${difference.inDays}d ago';
-  }
-}
-
-class _MetricRow extends StatelessWidget {
-  const _MetricRow({required this.icon, required this.value});
-
-  final IconData icon;
-  final int value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, _) {
-        return Row(
-          children: [
-            Icon(icon, size: 15, color: AppColors.textSecondary),
-            const SizedBox(width: 8),
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: value / 100,
-                  minHeight: 7,
-                  backgroundColor: ThemeColors.getDiagnosticStatusBackground(context),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    ThemeColors.getDiagnosticTealBright(context),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              '$value %',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 }
 
