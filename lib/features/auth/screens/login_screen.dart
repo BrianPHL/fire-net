@@ -96,8 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   _buildEmailField(),
                   const SizedBox(height: 16),
                   _buildPasswordField(),
-                  const SizedBox(height: 24),
-                  _buildForgotPassword(),
+                  // const SizedBox(height: 24),
+                  // _buildForgotPassword(),
                   const SizedBox(height: 24),
                   _buildLoginButton(),
                   const SizedBox(height: 16),
@@ -193,24 +193,24 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildForgotPassword() {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton(
-        onPressed: () {
-          // For future implementation if may forgot password function pa 
-        },
-        child: const Text(
-          'Forgot Password?',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildForgotPassword() {
+  //   return Align(
+  //     alignment: Alignment.centerRight,
+  //     child: TextButton(
+  //       onPressed: () {
+  //         // For future implementation if may forgot password function pa 
+  //       },
+  //       child: const Text(
+  //         'Forgot Password?',
+  //         style: TextStyle(
+  //           color: AppColors.primary,
+  //           fontSize: 14,
+  //           fontWeight: FontWeight.w600,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildLoginButton() {
     return CustomButton(
