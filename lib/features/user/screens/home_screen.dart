@@ -72,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.login,
+        AppRoutes.startup,
         (route) => false,
       );
     } on FirebaseAuthException catch (error) {

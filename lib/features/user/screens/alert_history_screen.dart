@@ -78,7 +78,7 @@ class _AlertHistoryScreenState extends State<AlertHistoryScreen> {
         return;
       }
 
-      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.startup, (route) => false);
     } on FirebaseAuthException catch (error) {
       if (!mounted) {
         return;

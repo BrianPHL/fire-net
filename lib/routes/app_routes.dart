@@ -1,6 +1,9 @@
 class AppRoutes {
   AppRoutes._();
 
+  // Startup route
+  static const String startup = '/startup';
+
   // Onboarding
   static const String onboarding = '/onboarding';
 

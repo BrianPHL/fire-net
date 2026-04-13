@@ -53,7 +53,7 @@ class EngineerScaffold extends StatelessWidget {
 
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.login,
+        AppRoutes.startup,
         (route) => false,
       );
     } on Exception {

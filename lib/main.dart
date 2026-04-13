@@ -113,9 +113,9 @@ class FireNetApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
             home: startupError == null
-                ? const SplashScreenWrapper()
+                ? null
                 : StartupErrorScreen(errorMessage: startupError!),
-            initialRoute: startupError == null ? null : null,
+            initialRoute: startupError == null ? AppRoutes.startup : null,
             onGenerateRoute: startupError == null ? _onGenerateRoute : null,
           );
         },
@@ -125,6 +125,9 @@ class FireNetApp extends StatelessWidget {
 
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case AppRoutes.startup:
+        return MaterialPageRoute(builder: (_) => const SplashScreenWrapper());
+
       // Onboarding route
       case AppRoutes.onboarding:
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
@@ -227,14 +230,18 @@ class SplashScreenWrapper extends StatefulWidget {
 }
 
 class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
+  static const Duration _minimumSplashDuration = Duration(milliseconds: 3500);
+
   final _authService = AuthService();
   late final Future<bool> _onboardingFuture;
+  late final Future<void> _minimumSplashFuture;
   String? _lastResolvedUid;
   Future<String>? _routeForUserFuture;
 
   @override
   void initState() {
     super.initState();
+    _minimumSplashFuture = Future<void>.delayed(_minimumSplashDuration);
     _onboardingFuture = OnboardingService.isOnboardingComplete();
   }
 
@@ -281,41 +288,52 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _onboardingFuture,
-      builder: (context, onboardingSnapshot) {
-        if (onboardingSnapshot.connectionState == ConnectionState.waiting) {
+    return FutureBuilder<void>(
+      future: _minimumSplashFuture,
+      builder: (context, splashSnapshot) {
+        if (splashSnapshot.connectionState != ConnectionState.done) {
           return const SplashScreen();
         }
 
-        final onboardingComplete = onboardingSnapshot.data ?? false;
-        if (!onboardingComplete) {
-          return const OnboardingScreen();
-        }
-
-        return StreamBuilder<User?>(
-          stream: _authService.authStateChanges(),
-          builder: (context, authSnapshot) {
-            if (authSnapshot.connectionState == ConnectionState.waiting) {
+        return FutureBuilder<bool>(
+          future: _onboardingFuture,
+          builder: (context, onboardingSnapshot) {
+            if (onboardingSnapshot.connectionState == ConnectionState.waiting) {
               return const SplashScreen();
             }
 
-            final user = authSnapshot.data;
-            if (user == null) {
-              _lastResolvedUid = null;
-              _routeForUserFuture = null;
-              return const LoginScreen();
+            final onboardingComplete = onboardingSnapshot.data ?? false;
+            if (!onboardingComplete) {
+              return const OnboardingScreen();
             }
 
-            return FutureBuilder<String>(
-              future: _getRouteFutureForUser(user),
-              builder: (context, routeSnapshot) {
-                if (routeSnapshot.connectionState == ConnectionState.waiting) {
+            return StreamBuilder<User?>(
+              stream: _authService.authStateChanges(),
+              builder: (context, authSnapshot) {
+                if (authSnapshot.connectionState == ConnectionState.none ||
+                    authSnapshot.connectionState == ConnectionState.waiting) {
                   return const SplashScreen();
                 }
 
-                final routeName = routeSnapshot.data ?? AppRoutes.login;
-                return _screenForRoute(routeName);
+                final user = authSnapshot.data;
+                if (user == null) {
+                  _lastResolvedUid = null;
+                  _routeForUserFuture = null;
+                  return const LoginScreen();
+                }
+
+                return FutureBuilder<String>(
+                  future: _getRouteFutureForUser(user),
+                  builder: (context, routeSnapshot) {
+                    if (routeSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const SplashScreen();
+                    }
+
+                    final routeName = routeSnapshot.data ?? AppRoutes.login;
+                    return _screenForRoute(routeName);
+                  },
+                );
               },
             );
           },

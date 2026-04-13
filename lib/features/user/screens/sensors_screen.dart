@@ -44,7 +44,7 @@ class _SensorsScreenState extends State<SensorsScreen> {
 
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.login,
+        AppRoutes.startup,
         (route) => false,
       );
     } on FirebaseAuthException catch (error) {
