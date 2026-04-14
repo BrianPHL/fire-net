@@ -5,8 +5,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/alert.dart';
+import '../../../models/sensor_node.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/alert_service.dart';
+import '../user_service.dart';
 import '../../../shared/widgets/status_pill.dart';
 
 class AlertDetailScreen extends StatefulWidget {
@@ -20,7 +22,9 @@ class AlertDetailScreen extends StatefulWidget {
 
 class _AlertDetailScreenState extends State<AlertDetailScreen> {
   final _alertService = AlertService();
+  final _userService = UserService();
   bool _isResolving = false;
+  bool _isLoadingSensor = false;
 
   Alert get _alert => widget.alert;
 
@@ -349,9 +353,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
     return Card(
       color: ThemeColors.getCardBackgroundLight(context),
       child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, AppRoutes.sensorDetail);
-        },
+        onTap: _openSensorDetails,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -403,6 +405,75 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _openSensorDetails() async {
+    if (_isLoadingSensor) {
+      return;
+    }
+
+    if (_alert.nodeId.isEmpty) {
+      ErrorDialogHelper.showSnackbarError(
+        context,
+        'Sensor details are unavailable for this alert.',
+      );
+      return;
+    }
+
+    setState(() => _isLoadingSensor = true);
+    ErrorDialogHelper.showLoadingDialog(
+      context,
+      message: 'Loading sensor details...',
+    );
+
+    SensorNode? matchedSensor;
+    String? errorMessage;
+
+    try {
+      final sensors = await _userService.streamSensorNodes().first;
+      if (!mounted) {
+        return;
+      }
+
+      for (final sensor in sensors) {
+        if (sensor.id == _alert.nodeId) {
+          matchedSensor = sensor;
+          break;
+        }
+      }
+
+      if (matchedSensor == null) {
+        errorMessage = 'Sensor not found for this alert.';
+      }
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      errorMessage = 'Unable to load sensor details. Please try again.';
+    } finally {
+      if (mounted) {
+        ErrorDialogHelper.closeLoadingDialog(context);
+        setState(() => _isLoadingSensor = false);
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    if (matchedSensor != null) {
+      Navigator.pushNamed(
+        context,
+        AppRoutes.sensorDetail,
+        arguments: matchedSensor,
+      );
+      return;
+    }
+
+    ErrorDialogHelper.showSnackbarError(
+      context,
+      errorMessage ?? 'Sensor details are unavailable for this alert.',
     );
   }
 
