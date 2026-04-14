@@ -231,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${emergencies.length} Active Emergency${emergencies.length > 1 ? 'ies' : ''}',
+                        '${emergencies.length} Active ${emergencies.length > 1 ? 'Emergencies' : 'Emergency'}',
                         style: TextStyle(
                           color: ThemeColors.getDanger(context),
                           fontSize: 16,
