@@ -95,7 +95,10 @@ class NodeManagementCard extends StatelessWidget {
                               icon: Icons.thermostat,
                               value: '${node.temperature.toStringAsFixed(1)}°',
                               label: 'Temp',
-                              color: AppColors.temperatureColor,
+                              color: ThemeColors.getSeverityColor(
+                                context,
+                                node.temperatureSeverity,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),

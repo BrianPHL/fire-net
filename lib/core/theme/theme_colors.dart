@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../constants/sensor_thresholds.dart';
 import 'app_colors.dart';
 import 'theme_provider.dart';
 
@@ -224,6 +225,19 @@ class ThemeColors {
   }
 
   // ========== SEMANTIC STATUS COLORS ==========
+  static Color getSeverityColor(BuildContext context, String severity) {
+    switch (severity) {
+      case SensorThresholds.severityDanger:
+        return getDanger(context);
+      case SensorThresholds.severityWarning:
+        return getWarning(context);
+      case SensorThresholds.severitySafe:
+        return getSafe(context);
+      default:
+        return getTextSecondary(context);
+    }
+  }
+
   static Color getDanger(BuildContext context) {
     return getColor(
       context,

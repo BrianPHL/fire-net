@@ -1,11 +1,21 @@
+import '../core/constants/sensor_thresholds.dart';
 import '../core/utils/severity_evaluator.dart';
+import 'threshold_config.dart';
 
 /// Sensor node model representing a physical sensor device
 class SensorNode {
+  static const Set<String> _knownStatuses = <String>{
+    'safe',
+    'warning',
+    'danger',
+    'offline',
+  };
+
   final String id;
   final String name;
   final String location;
   final String status;
+  final String temperatureSeverity;
   final double temperature;
   final double humidity;
   final double smoke;
@@ -25,6 +35,7 @@ class SensorNode {
     required this.name,
     required this.location,
     required this.status,
+    this.temperatureSeverity = SensorThresholds.severitySafe,
     required this.temperature,
     required this.humidity,
     required this.smoke,
@@ -40,7 +51,11 @@ class SensorNode {
     this.hasMlxObjectReading = false,
   });
 
-  factory SensorNode.fromRealtimeDb(String id, Map<dynamic, dynamic> data) {
+  factory SensorNode.fromRealtimeDb(
+    String id,
+    Map<dynamic, dynamic> data, {
+    ThresholdConfig? thresholds,
+  }) {
     final incomingMap = data.map(
       (key, value) => MapEntry(key.toString(), value),
     );
@@ -86,23 +101,46 @@ class SensorNode {
     final sensorError = _toBool(map['sensorError']) ?? false;
     final fireDetected = _toBool(map['fireDetected']) ?? false;
 
-    final status =
-        (map['status'] as String?) ??
-        _deriveStatus(
-          temperature: temperature,
-          smoke: smoke,
-          gas: gas,
-          hasSensorError: sensorError,
-          fireDetected: fireDetected,
-          mlxAmbient: mlxAmbient,
-          mlxObject: mlxObject,
-        );
+    final rawStatus = map['status']?.toString().trim().toLowerCase();
+    final hasKnownStatus = rawStatus != null && rawStatus.isNotEmpty && _knownStatuses.contains(rawStatus);
+    final statusOverride = hasKnownStatus ? rawStatus : null;
+    final thresholdConfig = thresholds ?? ThresholdConfig.defaults();
+    final temperatureSeverity = _deriveMetricSeverity(
+      value: temperature,
+      warning: thresholdConfig.temperatureWarning,
+      danger: thresholdConfig.temperatureDanger,
+    );
+
+    final status = statusOverride == 'offline'
+        ? 'offline'
+        : thresholds != null
+            ? _deriveStatus(
+                temperature: temperature,
+                smoke: smoke,
+                gas: gas,
+                hasSensorError: sensorError,
+                fireDetected: fireDetected,
+                mlxAmbient: mlxAmbient,
+                mlxObject: mlxObject,
+                thresholds: thresholds,
+              )
+            : statusOverride ??
+                _deriveStatus(
+                  temperature: temperature,
+                  smoke: smoke,
+                  gas: gas,
+                  hasSensorError: sensorError,
+                  fireDetected: fireDetected,
+                  mlxAmbient: mlxAmbient,
+                  mlxObject: mlxObject,
+                );
 
     return SensorNode(
       id: id,
       name: (map['name'] as String?) ?? 'ESP32 Sensor',
       location: (map['location'] as String?) ?? 'Unknown',
       status: status,
+      temperatureSeverity: temperatureSeverity,
       temperature: temperature,
       humidity: humidity,
       smoke: smoke,
@@ -124,6 +162,7 @@ class SensorNode {
     String? name,
     String? location,
     String? status,
+    String? temperatureSeverity,
     double? temperature,
     double? humidity,
     double? smoke,
@@ -143,6 +182,7 @@ class SensorNode {
       name: name ?? this.name,
       location: location ?? this.location,
       status: status ?? this.status,
+      temperatureSeverity: temperatureSeverity ?? this.temperatureSeverity,
       temperature: temperature ?? this.temperature,
       humidity: humidity ?? this.humidity,
       smoke: smoke ?? this.smoke,
@@ -186,6 +226,20 @@ class SensorNode {
       return value.toDouble();
     }
     return double.tryParse(value.toString());
+  }
+
+  static String _deriveMetricSeverity({
+    required double value,
+    required double warning,
+    required double danger,
+  }) {
+    if (value >= danger) {
+      return SensorThresholds.severityDanger;
+    }
+    if (value >= warning) {
+      return SensorThresholds.severityWarning;
+    }
+    return SensorThresholds.severitySafe;
   }
 
   static bool? _toBool(dynamic value) {
@@ -244,6 +298,7 @@ class SensorNode {
     bool fireDetected = false,
     double? mlxAmbient,
     double? mlxObject,
+    ThresholdConfig? thresholds,
   }) {
     return SeverityEvaluator.evaluateSeverity(
       temperature: temperature,
@@ -253,6 +308,7 @@ class SensorNode {
       hasSensorError: hasSensorError,
       mlxAmbient: mlxAmbient,
       mlxObject: mlxObject,
+      thresholds: thresholds,
     );
   }
 }

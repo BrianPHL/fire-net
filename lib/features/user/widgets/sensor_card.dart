@@ -96,7 +96,10 @@ class SensorCard extends StatelessWidget {
             _buildReadingItem(
               context,
               Icons.thermostat,
-              ThemeColors.getTemperatureColor(context),
+              ThemeColors.getSeverityColor(
+                context,
+                sensor.temperatureSeverity,
+              ),
               '${sensor.temperature.toStringAsFixed(1)}°',
               label: 'Temp',
             ),

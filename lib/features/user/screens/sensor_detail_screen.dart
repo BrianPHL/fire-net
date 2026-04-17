@@ -134,7 +134,10 @@ class SensorDetailScreen extends StatelessWidget {
           sensor.temperature,
           '°C',
           Icons.thermostat,
-          ThemeColors.getTemperatureColor(context),
+          ThemeColors.getSeverityColor(
+            context,
+            sensor.temperatureSeverity,
+          ),
         ),
         const SizedBox(height: 12),
         Row(
