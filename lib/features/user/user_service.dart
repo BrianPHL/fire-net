@@ -1,42 +1,80 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../models/sensor_node.dart';
+import '../../models/threshold_config.dart';
+import '../../services/threshold_config_service.dart';
 
 class UserService {
-  UserService({FirebaseDatabase? database})
-    : _database = database ?? _buildDatabase();
+  UserService({
+    FirebaseDatabase? database,
+    ThresholdConfigService? thresholdConfigService,
+  }) : _database = database ?? _buildDatabase(),
+       _thresholdConfigService =
+           thresholdConfigService ?? ThresholdConfigService();
 
   final FirebaseDatabase _database;
+  final ThresholdConfigService _thresholdConfigService;
 
   DatabaseReference get _sensorNodesRef => _database.ref('sensor_nodes');
 
   Stream<List<SensorNode>> streamSensorNodes() {
-    return _sensorNodesRef.onValue.map((event) {
-      final value = event.snapshot.value;
-      if (value == null) {
-        return <SensorNode>[];
+    late StreamController<List<SensorNode>> controller;
+    StreamSubscription<DatabaseEvent>? sensorSubscription;
+    StreamSubscription<ThresholdConfig?>? thresholdSubscription;
+    ThresholdConfig activeThresholds = ThresholdConfig.defaults();
+    dynamic lastPayload;
+
+    void emitFromPayload(dynamic payload) {
+      if (controller.isClosed) {
+        return;
       }
+      controller.add(_buildSensorNodesFromValue(payload, activeThresholds));
+    }
 
-      if (value is Map<dynamic, dynamic>) {
-        if (_isSingleNodePayload(value)) {
-          return <SensorNode>[SensorNode.fromRealtimeDb('esp32-node-1', value)];
-        }
-
-        final sensors = <SensorNode>[];
-        value.forEach((key, nodeValue) {
-          if (nodeValue is Map<dynamic, dynamic>) {
-            sensors.add(SensorNode.fromRealtimeDb(key.toString(), nodeValue));
-          }
-        });
-
-        sensors.sort((a, b) => a.name.compareTo(b.name));
-        return sensors;
+    void emitLastPayload() {
+      if (lastPayload != null) {
+        emitFromPayload(lastPayload);
       }
+    }
 
-      return <SensorNode>[];
-    });
+    controller = StreamController<List<SensorNode>>.broadcast(
+      onListen: () {
+        thresholdSubscription = _thresholdConfigService
+            .watchThresholdConfig()
+            .listen(
+          (config) {
+            activeThresholds = config ?? ThresholdConfig.defaults();
+            emitLastPayload();
+          },
+          onError: (Object error) {
+            activeThresholds = ThresholdConfig.defaults();
+            emitLastPayload();
+          },
+        );
+
+        sensorSubscription = _sensorNodesRef.onValue.listen(
+          (event) {
+            lastPayload = event.snapshot.value;
+            emitFromPayload(lastPayload);
+          },
+          onError: (Object error) {
+            if (!controller.isClosed) {
+              controller.addError(error);
+            }
+          },
+        );
+      },
+      onCancel: () {
+        sensorSubscription?.cancel();
+        thresholdSubscription?.cancel();
+      },
+    );
+
+    return controller.stream;
   }
 
   Stream<bool> streamFirebaseConnection() {
@@ -56,6 +94,45 @@ class UserService {
       app: Firebase.app(),
       databaseURL: databaseUrl,
     );
+  }
+
+  List<SensorNode> _buildSensorNodesFromValue(
+    dynamic value,
+    ThresholdConfig thresholds,
+  ) {
+    if (value == null) {
+      return <SensorNode>[];
+    }
+
+    if (value is Map<dynamic, dynamic>) {
+      if (_isSingleNodePayload(value)) {
+        return <SensorNode>[
+          SensorNode.fromRealtimeDb(
+            'esp32-node-1',
+            value,
+            thresholds: thresholds,
+          ),
+        ];
+      }
+
+      final sensors = <SensorNode>[];
+      value.forEach((key, nodeValue) {
+        if (nodeValue is Map<dynamic, dynamic>) {
+          sensors.add(
+            SensorNode.fromRealtimeDb(
+              key.toString(),
+              nodeValue,
+              thresholds: thresholds,
+            ),
+          );
+        }
+      });
+
+      sensors.sort((a, b) => a.name.compareTo(b.name));
+      return sensors;
+    }
+
+    return <SensorNode>[];
   }
 
   bool _isSingleNodePayload(Map<dynamic, dynamic> value) {

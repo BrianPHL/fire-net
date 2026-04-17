@@ -3,8 +3,8 @@ class SensorThresholds {
   SensorThresholds._();
 
   // Temperature thresholds (in Celsius)
-  static const double tempWarning = 40.0;
-  static const double tempDanger = 50.0;
+  static const double tempWarning = 30.0;
+  static const double tempDanger = 40.0;
   static const double tempNormal = 35.0;
 
   // Smoke thresholds (in PPM - parts per million)
